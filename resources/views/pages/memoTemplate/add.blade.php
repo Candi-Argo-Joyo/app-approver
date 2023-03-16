@@ -40,40 +40,42 @@
                             <label for="">Template Name</label>
                             <input type="text" class="form-control">
                         </div>
-                        <table class="table border table-bordered" id="tb-template">
-                            <thead>
-                                <tr>
-                                    <th style="width: 15px">#</th>
-                                    {{-- <th>Content Name</th> --}}
-                                    <th>Template</th>
-                                    <th style="width: 25px">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div id="urutan">1</div>
-                                    </td>
-                                    {{-- <td>
-                                    </td> --}}
-                                    <td>
-                                        <div class="form-group mb-3">
-                                            <label for="">Content Name</label>
-                                            <input type="text" class="form-control">
-                                        </div>
-                                        <div class="form-group mb-3">
-                                            <label for="">Content</label>
-                                            <textarea name="content" id="content" style="min-height: 500px" class="form-control editor"></textarea>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <a href="javascript:void(0)" class="badge bg-primary" id="more">
-                                            +
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table border table-bordered" id="tb-template">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 15px">#</th>
+                                        {{-- <th>Content Name</th> --}}
+                                        <th>Template</th>
+                                        <th style="width: 25px">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div id="urutan">1</div>
+                                        </td>
+                                        {{-- <td>
+                                        </td> --}}
+                                        <td>
+                                            <div class="form-group mb-3">
+                                                <label for="">Content Name</label>
+                                                <input type="text" class="form-control">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="">Content</label>
+                                                <textarea name="content" id="content" style="min-height: 500px" class="form-control editor"></textarea>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0)" class="badge bg-primary" id="more">
+                                                +
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <button class="btn btn-primary">Save</button>
                     </div>
                 </div>
