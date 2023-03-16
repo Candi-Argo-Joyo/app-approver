@@ -95,7 +95,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{{ route('users') }}">Users</a>
-                        <a class="dropdown-item" href="#">Level</a>
+                        <a class="dropdown-item" href="{{ route('level') }}">Level</a>
                         <a class="dropdown-item" href="#">Setting Web</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">Data Menu</a>
@@ -103,14 +103,27 @@
                     </div>
                 </li>
                 <li class="nav-item d-none d-md-block">
-                    <a class="nav-link" href="javascript:void(0)">
+                    {{-- <a class="nav-link" href="javascript:void(0)">
                         <div class="customize-input">
                             <select class="custom-select form-control bg-white custom-radius custom-shadow border-0">
                                 <option value="0">EN</option>
                                 <option selected value="1">ID</option>
                             </select>
                         </div>
+                    </a> --}}
+                    <a class="nav-link" href="javascript:void(0)">
+                        <div class="customize-input">
+                            <select
+                                class="lang nav-link custom-select form-control bg-white custom-radius custom-shadow border-0">
+                                <option href="javascript:void(0)" data-lang="en"> English</option>
+                                <option href="javascript:void(0)" data-lang="id"> Indonesia</option>
+                                <option href="javascript:void(0)" data-lang="ja"> Jepang</option>
+                            </select>
+                        </div>
                     </a>
+                </li>
+                <li>
+                    <div id='google_translate_element'></div>
                 </li>
             </ul>
             <!-- ============================================================== -->

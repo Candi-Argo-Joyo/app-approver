@@ -22,6 +22,21 @@
 </head>
 
 <body>
+    <style>
+        .goog-te-banner-frame {
+            display: none;
+            height: 0 !important;
+            visibility: hidden
+        }
+
+        #google_translate_element {
+            display: none;
+        }
+
+        .skiptranslate {
+            display: none
+        }
+    </style>
     <!-- Preloader - style you can find in spinners.css -->
     <div class="preloader">
         <div class="lds-ripple">
@@ -99,6 +114,9 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+    <!--Google translate JS script-->
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+    </script>
     <!-- All Jquery -->
     <!-- ============================================================== -->
     <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
@@ -112,6 +130,57 @@
     <!--Custom JavaScript -->
     <script src="../dist/js/custom.min.js"></script>
     <!--This page JavaScript -->
+    <script>
+        googleTranslateElementInit()
+
+        $('body').attr('style', '')
+
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                includedLanguages: 'en,id,ja',
+                layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+            }, 'google_translate_element');
+        }
+
+        function triggerHtmlEvent(element, eventName) {
+            var event;
+            if (document.createEvent) {
+                event = document.createEvent('HTMLEvents');
+                event.initEvent(eventName, true, true);
+                element.dispatchEvent(event);
+            } else {
+                event = document.createEventObject();
+                event.eventType = eventName;
+                element.fireEvent('on' + event.eventType, event);
+            }
+        }
+
+        $(document).ready(function() {
+            $('.lang').on('change', function() {
+                var value = $('option:selected', this).attr('data-lang');
+                updateLanguage(value);
+            })
+
+            function updateLanguage(value) {
+                var selectIndex = 0;
+                var a = document.querySelector("#google_translate_element select");
+                switch (value) {
+                    case "id":
+                        selectIndex = 1;
+                        break;
+                    case "en":
+                        selectIndex = 0;
+                        break;
+                    case "ja":
+                        selectIndex = 2;
+                        break;
+
+                }
+                a.selectedIndex = selectIndex;
+                a.dispatchEvent(new Event('change'));
+            }
+        })
+    </script>
     @yield('script')
 </body>
 

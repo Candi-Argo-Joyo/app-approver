@@ -43,6 +43,11 @@
                                 <span class="hide-menu"> Digital Assign </span>
                             </a>
                         </li>
+                        <li class="sidebar-item">
+                            <a href="{{ route('formBuilder') }}" class="sidebar-link">
+                                <span class="hide-menu"> Form Builder </span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <li class="list-divider"></li>

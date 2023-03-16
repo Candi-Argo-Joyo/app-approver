@@ -260,7 +260,7 @@
                                 <div class="from-group">
                                     <label class="form-label" for="">Diteruskan Kepada</label>
                                     <select name="" id="sendMail" class="form-control" multiple>
-                                        <option value="">User 1</option>
+                                        <option value="User 1">User 1</option>
                                     </select>
                                 </div>
                             </div>

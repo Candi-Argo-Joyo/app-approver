@@ -4,6 +4,7 @@ use App\Http\Controllers\ApprovalMemo;
 use App\Http\Controllers\Approver1;
 use App\Http\Controllers\Approver2;
 use App\Http\Controllers\Approver3;
+use App\Http\Controllers\FormBuilder;
 use App\Http\Controllers\CreateMemo;
 use App\Http\Controllers\Dashboard;
 use App\Http\Controllers\DataKredit;
@@ -13,6 +14,7 @@ use App\Http\Controllers\DigitalAsign;
 use App\Http\Controllers\Divisi;
 use App\Http\Controllers\EntryKredit;
 use App\Http\Controllers\Knowledge;
+use App\Http\Controllers\Level;
 use App\Http\Controllers\MemoTemplate;
 use App\Http\Controllers\Sales;
 use App\Http\Controllers\Users;
@@ -53,6 +55,11 @@ Route::controller(MemoTemplate::class)->group(function () {
 
 Route::controller(DigitalAsign::class)->group(function () {
     Route::get('/digital-asign', 'index')->name('digitalAsign');
+});
+
+Route::controller(FormBuilder::class)->group(function () {
+    Route::get('/form-builder', 'index')->name('formBuilder');
+    Route::get('/form-builder/add', 'add')->name('formBuilder.add');
 });
 
 Route::controller(EntryKredit::class)->group(function () {
@@ -96,4 +103,8 @@ Route::controller(DataMemo::class)->group(function () {
 
 Route::controller(Users::class)->group(function () {
     Route::get('/users', 'index')->name('users');
+});
+
+Route::controller(Level::class)->group(function () {
+    Route::get('/level', 'index')->name('level');
 });
