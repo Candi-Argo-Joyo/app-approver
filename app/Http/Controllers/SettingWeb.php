@@ -6,10 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
-class Sales extends Controller
+class SettingWeb extends Controller
 {
     public function index()
     {
-        return view('pages/sales/index');
+        return view('pages/settingweb/index');
     }
 }

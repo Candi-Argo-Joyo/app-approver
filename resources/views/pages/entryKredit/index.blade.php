@@ -1,8 +1,8 @@
 @extends('index')
 @section('title', 'Entry Kredit | Aprover KDDI')
 @section('css')
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css') }}">
 @endsection
 @section('content')
     <!-- ============================================================== -->
@@ -85,7 +85,7 @@
     <!--End Container fluid  -->
 @endsection
 @section('script')
-    <script src="../assets/extra-libs/datatables.net/js/jquery.dataTables.min.js"></script>
-    <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
-    <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
+    <script src="{{ asset('assets/extra-libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('dist/js/pages/datatable/datatable-basic.init.js') }}"></script>
 @endsection

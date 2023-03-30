@@ -9,12 +9,12 @@
     <div class="page-breadcrumb">
         <div class="row">
             <div class="col-7 align-self-center">
-                <h4 class="page-title text-truncate text-dark font-weight-medium mb-1">Data Sales</h4>
+                <h4 class="page-title text-truncate text-dark font-weight-medium mb-1">Mapping Users</h4>
                 <div class="d-flex align-items-center">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb m-0 p-0">
                             <li class="breadcrumb-item"><a href="javascript:void(0)" class="text-muted">Master Data</a></li>
-                            <li class="breadcrumb-item text-muted active" aria-current="page">Sales</li>
+                            <li class="breadcrumb-item text-muted active" aria-current="page">Mapping Users</li>
                         </ol>
                     </nav>
                 </div>
@@ -22,7 +22,7 @@
             <div class="col-5 align-self-center">
                 <div class="customize-input float-end">
                     <a href="javasctipt:void(0)" class="btn btn-primary" data-bs-toggle="modal"
-                        data-bs-target="#myModal">Add Sales</a>
+                        data-bs-target="#myModal">Mapping Now</a>
                 </div>
             </div>
         </div>
@@ -35,15 +35,16 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">List Data Sales</h4>
+                        <h4 class="card-title">List Mapping Users</h4>
                         <div class="table-responsive">
                             <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Name</th>
-                                        <th>No HP</th>
-                                        <th>Total Go Live</th>
+                                        <th>Full Name</th>
+                                        <th>Email</th>
+                                        <th>Position</th>
+                                        <th>Division</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -53,19 +54,9 @@
                                         <td>Tiger Nixon</td>
                                         <td>0851331237812</td>
                                         <td>12</td>
-                                        <td>
-                                            <a href="javascript:void(0)" class="badge bg-warning">Edit</a>
-                                            <a href="javascript:void(0)" class="badge bg-danger">Delete</a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Donna Snider</td>
-                                        <td>0851331237812</td>
                                         <td>12</td>
                                         <td>
-                                            <a href="javascript:void(0)" class="badge bg-warning">Edit</a>
-                                            <a href="javascript:void(0)" class="badge bg-danger">Delete</a>
+                                            <a href="javascript:void(0)" class="badge bg-info">Rollback</a>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -79,26 +70,37 @@
     </div>
     <!--End Container fluid  -->
     <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Form Sales</h4>
+                    <h4 class="modal-title" id="myModalLabel">Form Mapping Users</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="name">Name</label>
-                        <input class="form-control" type="text" id="name" required=""
-                            placeholder="Michael Zenaty">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="address">No Hp</label>
-                        <input class="form-control" type="text" id="address" required="" placeholder="Address">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="code">Total Go Live</label>
-                        <input class="form-control" type="text" id="code" required="" placeholder="Dealer Code">
-                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Job Title / Position</th>
+                                <th>Divisi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Akun Test</td>
+                                <td>test@mail.com</td>
+                                <td>Manager</td>
+                                <td>
+                                    <select name="" id="" class="form-control">
+                                        <option value="">--Job Title/Position--</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>

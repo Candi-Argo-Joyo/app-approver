@@ -5,6 +5,33 @@
     <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css">
 @endsection
 @section('content')
+    <style>
+        .buton-eye {
+            display: block;
+            padding: 6px 12px;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #4f5467;
+            background-color: transparent;
+            background-clip: padding-box;
+            border: var(--bs-border-width) solid #e9ecef;
+            appearance: none;
+            border-radius: 2px;
+            box-shadow: inset 0 1px 2px rgba(var(--bs-body-color-rgb), 0.075);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .border-radius-left {
+            border-top-left-radius: 2px !important;
+            border-bottom-left-radius: 2px !important;
+        }
+
+        .border-radius-right {
+            border-top-right-radius: 2px !important;
+            border-bottom-right-radius: 2px !important;
+        }
+    </style>
     <!-- ============================================================== -->
     <div class="page-breadcrumb">
         <div class="row">
@@ -43,6 +70,7 @@
                                         <th>Full Name</th>
                                         <th>User Name</th>
                                         <th>Email</th>
+                                        <th>Position</th>
                                         <th>Level</th>
                                         <th>Action</th>
                                     </tr>
@@ -53,6 +81,7 @@
                                         <td>Anton Wowo</td>
                                         <td>anton_wowo</td>
                                         <td>anton@mail.com</td>
+                                        <td>Manager</td>
                                         <td>User</td>
                                         <td>
                                             <a href="#" class="badge bg-warning">Edit</a>
@@ -85,7 +114,20 @@
                     <div class="form-group mb-3">
                         <label class="form-label" for="name">Username</label>
                         <input class="form-control" type="text" id="name" required=""
-                            placeholder="Michael Zenaty">
+                            placeholder="michael_zenaty">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="password">Password</label>
+                        <div class="d-flex">
+                            <input style="border-radius: unset" class="form-control border-radius-left" type="password"
+                                id="password" value="kddi123" required>
+                            <div role="button" class="buton-eye border-radius-right show">
+                                <div style="padding-top: 1.1px;"><i class="fas fa-eye "></i></div>
+                            </div>
+                            <div role="button" class="buton-eye border-radius-right hidden" style="display:none;">
+                                <div style="padding-top: 1.1px;"><i class="fas fa-eye-slash"></i></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group mb-3">
                         <label class="form-label" for="name">Email</label>
@@ -93,9 +135,9 @@
                             placeholder="michael@mail.com">
                     </div>
                     <div class="form-group mb-3">
-                        <label class="form-label" for="name">Level</label>
+                        <label class="form-label" for="name">Jabatan</label>
                         <select name="" id="" class="form-control">
-                            <option value="">--Pilih Level--</option>
+                            <option value="">--Select Jabatan--</option>
                         </select>
                     </div>
                 </div>
@@ -111,4 +153,17 @@
     <script src="../assets/extra-libs/datatables.net/js/jquery.dataTables.min.js"></script>
     <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
     <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
+    <script>
+        $('.show').mousedown(function() {
+            $(this).hide()
+            $('#password').attr('type', 'text')
+            $('.hidden').show()
+        })
+
+        $('.hidden').mousedown(function() {
+            $(this).hide()
+            $('#password').attr('type', 'password')
+            $('.show').show()
+        })
+    </script>
 @endsection

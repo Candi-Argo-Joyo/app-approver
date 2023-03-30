@@ -10,7 +10,7 @@ class EntryKredit extends Controller
 {
     public function index()
     {
-        return view('pages/entryKredit/index');
+        return view('pages/entrykredit/index');
     }
 
     public function add()
@@ -19,6 +19,6 @@ class EntryKredit extends Controller
             'selected' => 'kredit'
         ];
 
-        return view('pages/entryKredit/add', $data);
+        return view('pages/entrykredit/add', $data);
     }
 }

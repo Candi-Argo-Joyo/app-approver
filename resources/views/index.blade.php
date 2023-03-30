@@ -9,16 +9,20 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/images/favicon.png') }}">
     <title>@yield('title')</title>
     <!-- Custom CSS -->
     @yield('css')
     <!-- Custom CSS -->
-    <link href="../dist/css/style.min.css" rel="stylesheet">
+    <link href="{{ asset('dist/css/style.min.css') }}" rel="stylesheet">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
 <![endif]-->
+
+    {{-- sweetalert --}}
+    <script src="{{ asset('assets/sweetalert/sweetalert2.all.min.js') }}"></script>
+    <link href="{{ asset('assets/sweetalert/sweetalert2.min.css') }}" rel="stylesheet">
 </head>
 
 <body>
@@ -34,7 +38,11 @@
         }
 
         .skiptranslate {
-            display: none
+            display: none;
+        }
+
+        .font-700 {
+            font-weight: 700;
         }
     </style>
     <!-- Preloader - style you can find in spinners.css -->
@@ -115,23 +123,24 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
     <!--Google translate JS script-->
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-    </script>
+    {{-- <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+    </script> --}}
     <!-- All Jquery -->
     <!-- ============================================================== -->
-    <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
-    <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <!-- apps -->
     <!-- apps -->
-    <script src="../dist/js/app-style-switcher.js"></script>
-    <script src="../dist/js/feather.min.js"></script>
-    <script src="../assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js"></script>
-    <script src="../dist/js/sidebarmenu.js"></script>
+    <script src="{{ asset('dist/js/app-style-switcher.js') }}"></script>
+    <script src="{{ asset('dist/js/feather.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/perfect-scrollbar/dist/perfect-scrollbar.jquery.min.js') }}"></script>
+    <div data-sidebar>
+    </div>
     <!--Custom JavaScript -->
-    <script src="../dist/js/custom.min.js"></script>
+    <script src="{{ asset('dist/js/custom.min.js') }}"></script>
     <!--This page JavaScript -->
     <script>
-        googleTranslateElementInit()
+        // googleTranslateElementInit()
 
         $('body').attr('style', '')
 
@@ -180,6 +189,19 @@
                 a.dispatchEvent(new Event('change'));
             }
         })
+        sidebar()
+
+        function sidebar() {
+            $.ajax({
+                url: "{{ route('dataMenu.sidebar') }}",
+                type: "get",
+                dataType: "json",
+                success: function(response) {
+                    $('ul[id="sidebarnav"]').html(response.data)
+                    $('div[data-sidebar]').html(response.script)
+                }
+            })
+        }
     </script>
     @yield('script')
 </body>

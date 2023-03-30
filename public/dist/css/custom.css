@@ -6,6 +6,28 @@
     padding: 0.5rem;
 }
 
+.bg-layout{
+    background-color: #fff;
+}
+
+.bg-layout:hover{
+    box-shadow: 0px 7px 7px 0px rgb(0 0 0 / 5%);
+}
+
+.bg-gray {
+    background-color: #e8eaec;
+    color:#5f76e8;
+}
+
+.bg-gray:hover{
+    background-color: #ddd;
+}
+
+.checked{
+    background-color: #5f76e8;
+    color: #fff;
+}
+
 .border-color-gray {
     border-color: #ddd !important;
     border-width: 1px !important;
@@ -34,4 +56,8 @@
 .no-border {
     border: none;
     border-color: transparent;
+}
+
+.border-bottom{
+    border-bottom:1px;
 }

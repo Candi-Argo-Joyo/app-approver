@@ -10,7 +10,8 @@
             <div class="navbar-brand">
                 <!-- Logo icon -->
                 <a href="index.html">
-                    <img src="../images/KDDI_Logo.svg.png" alt="" class="img-fluid" style="width: 130px;">
+                    <img src="{{ asset('images/KDDI_Logo.svg.png') }}" alt="" class="img-fluid"
+                        style="width: 130px;">
                 </a>
             </div>
             <!-- ============================================================== -->
@@ -96,21 +97,13 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="{{ route('users') }}">Users</a>
                         <a class="dropdown-item" href="{{ route('level') }}">Level</a>
-                        <a class="dropdown-item" href="#">Setting Web</a>
+                        <a class="dropdown-item" href="{{ route('settingweb') }}">Setting SSO/WEB</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Data Menu</a>
+                        <a class="dropdown-item" href="{{ route('dataMenu') }}">Data Menu</a>
                         <a class="dropdown-item" href="#">Setup Menu</a>
                     </div>
                 </li>
                 <li class="nav-item d-none d-md-block">
-                    {{-- <a class="nav-link" href="javascript:void(0)">
-                        <div class="customize-input">
-                            <select class="custom-select form-control bg-white custom-radius custom-shadow border-0">
-                                <option value="0">EN</option>
-                                <option selected value="1">ID</option>
-                            </select>
-                        </div>
-                    </a> --}}
                     <a class="nav-link" href="javascript:void(0)">
                         <div class="customize-input">
                             <select
@@ -136,8 +129,8 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" data-bs-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
-                        <img src="../assets/images/users/profile-pic.jpg" alt="user" class="rounded-circle"
-                            width="40">
+                        <img src="{{ asset('assets/images/users/profile-pic.jpg') }}" alt="user"
+                            class="rounded-circle" width="40">
                         <span class="ms-2 d-none d-lg-inline-block"><span>Hello,</span> <span class="text-dark">Jason
                                 Doe</span> <i data-feather="chevron-down" class="svg-icon"></i></span>
                     </a>

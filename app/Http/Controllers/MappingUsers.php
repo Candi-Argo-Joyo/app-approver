@@ -6,10 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
-class Dealer extends Controller
+class MappingUsers extends Controller
 {
     public function index()
     {
-        return view('pages/dealer/index');
+        return view('pages/mappinguser/index');
     }
 }

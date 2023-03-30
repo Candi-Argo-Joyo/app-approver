@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateFormFieldTable extends Migration
+class CreateOptionValue extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,11 @@ class CreateFormFieldTable extends Migration
      */
     public function up()
     {
-        Schema::create('form_field', function (Blueprint $table) {
+        Schema::create('option_value', function (Blueprint $table) {
             $table->id();
-            $table->string('field_name', 255);
-            $table->string('type', 255);
-            $table->text('label');
-            $table->text('field');
+            $table->integer('id_option_group');
+            $table->string('value')->nullable();
+            $table->string('placeholder')->default('False');
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ class CreateFormFieldTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('form_field');
+        Schema::dropIfExists('option_value');
     }
 }
