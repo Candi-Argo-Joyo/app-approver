@@ -10,6 +10,14 @@ class SettingWeb extends Controller
 {
     public function index()
     {
-        return view('pages/settingweb/index');
+        $data = [
+            'ldap' => json_decode(file_get_contents('ldap.json'), true)
+        ];
+        return view('pages/settingweb/index', $data);
+    }
+
+    public function saveLdap(Request $request)
+    {
+        # code...
     }
 }

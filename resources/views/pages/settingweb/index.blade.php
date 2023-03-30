@@ -40,14 +40,15 @@
                                 <div class="form-group">
                                     <label for="host" class="col-form-label">Hosts</label>
                                     <input type="text" class="form-control" id="host"
-                                        placeholder="['corp-dc1.corp.acme.org', 'corp-dc2.corp.acme.org']">
+                                        placeholder="['corp-dc1.corp.acme.org', 'corp-dc2.corp.acme.org']"
+                                        value="{{ $ldap['default']['hosts'] }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="base_dn" class="col-form-label">base_dn</label>
                                     <input type="text" class="form-control" id="base_dn"
-                                        placeholder="dc=corp,dc=acme,dc=org">
+                                        placeholder="dc=corp,dc=acme,dc=org" value="{{ $ldap['default']['base_dn'] }}">
                                 </div>
                             </div>
                         </div>
@@ -55,74 +56,48 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="host" class="col-form-label">username</label>
-                                    <input type="text" class="form-control" id="host" placeholder="admin">
+                                    <input type="text" class="form-control" id="host" placeholder="admin"
+                                        value="{{ $ldap['default']['username'] }}">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="host" class="col-form-label">password</label>
-                                    <input type="text" class="form-control" id="host" placeholder="password">
+                                    <input type="text" class="form-control" id="host" placeholder="password"
+                                        value="{{ $ldap['default']['password'] }}">
                                 </div>
                             </div>
                         </div>
                         <h5 class="mt-5">Optional Configuration Options</h5>
                         <div class="row mt-4 justify-items-center">
-                            <label for="" class="col-sm-2 col-form-label">schema</label>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control" id="host"
-                                    placeholder="Adldap\Schemas\ActiveDirectory::class"
-                                    value="Adldap\Schemas\ActiveDirectory::class" readonly>
-                            </div>
-                        </div>
-                        <div class="row mt-4 justify-items-center">
-                            <label for="" class="col-sm-2 col-form-label">account_prefix</label>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control" id="host" placeholder="ACME-">
-                            </div>
-                        </div>
-                        <div class="row mt-4 justify-items-center">
-                            <label for="" class="col-sm-2 col-form-label">account_suffix</label>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control" id="host" placeholder="@acme.org">
-                            </div>
-                        </div>
-                        <div class="row mt-4 justify-items-center">
                             <label for="" class="col-sm-2 col-form-label">port</label>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" id="host" placeholder="389">
-                            </div>
-                        </div>
-                        <div class="row mt-4 justify-items-center">
-                            <label for="" class="col-sm-2 col-form-label">follow_referrals</label>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control" id="host" placeholder="false">
+                                <input type="text" class="form-control" id="host" placeholder="389"
+                                    value="{{ $ldap['default']['port'] }}">
                             </div>
                         </div>
                         <div class="row mt-4 justify-items-center">
                             <label for="" class="col-sm-2 col-form-label">use_ssl</label>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" id="host" placeholder="false">
+                                <input type="text" class="form-control" id="host" placeholder="false"
+                                    value="{{ $ldap['default']['use_ssl'] }}">
                             </div>
                         </div>
                         <div class="row mt-4 justify-items-center">
                             <label for="" class="col-sm-2 col-form-label">use_tls</label>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" id="host" placeholder="false">
-                            </div>
-                        </div>
-                        <div class="row mt-4 justify-items-center">
-                            <label for="" class="col-sm-2 col-form-label">version</label>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control" id="host" placeholder="3">
+                                <input type="text" class="form-control" id="host" placeholder="false"
+                                    value="{{ $ldap['default']['use_tls'] }}">
                             </div>
                         </div>
                         <div class="row mt-4 justify-items-center">
                             <label for="" class="col-sm-2 col-form-label">timeout</label>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" id="host" placeholder="5">
+                                <input type="text" class="form-control" id="host" placeholder="5"
+                                    value="{{ $ldap['default']['timeout'] }}">
                             </div>
                         </div>
-                        <button type="button" class="btn btn-primary mt-4">Save</button>
+                        <button type="button" class="btn btn-primary mt-4">Save LDAP</button>
                     </form>
                 </div>
                 <div class="card" id="web" style="display: none">

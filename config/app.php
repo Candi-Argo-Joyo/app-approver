@@ -232,4 +232,5 @@ return [
 
     ],
 
+    // 'ldap_global_setup' =>  resolve(\App\Http\Controllers\LdapSetting::class)
 ];
