@@ -21,6 +21,7 @@ class FormBuilder extends Controller
         $data = [
             'selected' => 'form_builder',
             'html' => isset($request->form) ? DB::table('html_form')->where('id', $request->form)->first() : DB::table('html_form')->where('status', 'draft')->first(),
+            'page' => DB::table('menu')->where('parent', 0)->where('status', 'active')->get(),
         ];
         return view('pages/formbuilder/addform', $data);
     }
@@ -69,7 +70,8 @@ class FormBuilder extends Controller
 
             $msg = [
                 'success' => [
-                    'data' => $html
+                    'data' => $html,
+                    'param' => $html_form_id
                 ]
             ];
         } catch (\Throwable $e) {
@@ -730,6 +732,43 @@ class FormBuilder extends Controller
         }
 
         return response()->json(['error' => true]);
+    }
+
+    // area setting form
+    public function moreApprover()
+    {
+        $approver = DB::table('users')->where('role', 'user')->where('is_mapping', 'true')->get();
+        $page = DB::table('menu')->where('status', 'active')->where('page', 'Approver')->whereNotIn('parent', ['0'])->whereNull('id_html_form')->get();
+        $html = '<tr>
+                    <td><input type="text" name="approver-name[]" class="form-control"></td>
+                     <td>
+                         <select name="user-approver[]" id="" class="form-control">
+                             <option value="">--Select Approver--</option>';
+        foreach ($approver as $a) {
+            $html .= '<option value="' . $a->id . '">' . $a->name . '</option>';
+        }
+        $html .= '</select>
+                     </td>
+                     <td>
+                         <select name="page-approver[]" id="" class="form-control">
+                             <option value="">--Select Page Approver--</option>';
+        foreach ($page as $p) {
+            $html .= '<option value="' . $p->id . '">' . $p->name . '</option>';
+        }
+        $html .= '</select>
+                     </td>
+                     <td>
+                         <a href="javascript:void(0)" class="btn btn-danger del-approver">-</a>
+                     </td>
+                 </tr>';
+
+        return response()->json(['data' => $html]);
+    }
+
+    public function getpageApprover(Request $request)
+    {
+        $page = DB::table('menu')->where('parent', $request->parent)->where('page', 'Approver')->whereNotIn('parent', ['0'])->whereNull('id_html_form')->get();
+        return response()->json(['data' => $page]);
     }
 
     public function preview(Request $request)

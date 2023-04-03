@@ -62,56 +62,60 @@
                 </div>
                 <div class="card" id="set" style="display: none">
                     <div class="card-body">
-                        {{-- <div class="row"> --}}
-                        <div class="col-md-6 mb-4">
-                            <div class="form-group">
-                                <label for="">Set Page <small class="text-danger">(mandatory)</small> <br><small
-                                        class="text-info">form
-                                        will be displayed on
-                                        the selected
-                                        page</small></label>
-                                <select name="" id="" class="form-control">
-                                    <option value="">--Choose Page--</option>
-                                </select>
+                        <form action="" id="form-setting">
+                            <input type="text" id="param-form"
+                                value="<?= request()->get('form') ? request()->get('form') : '' ?>">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-group">
+                                    <label for="parent-page">Set Page <small class="text-danger">(mandatory)</small>
+                                        <br><small class="text-info">form
+                                            will be displayed on
+                                            the selected
+                                            page</small></label>
+                                    <select name="parent-page" id="parent-page" class="form-control">
+                                        <option value="">--Choose Page--</option>
+                                        @foreach ($page as $p)
+                                            <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        {{-- </div> --}}
-                        <h5 class="m-0">Set Approver</h5>
-                        <small class="text-info">select user as approver</small>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Approver Name</th>
-                                    <th>Approver (user)</th>
-                                    <th>Set Page Approver</th>
-                                    <th>Step</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><input type="text" class="form-control"></td>
-                                    <td>
-                                        <select name="" id="" class="form-control">
-                                            <option value="">--Select Approver--</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select name="" id="" class="form-control">
-                                            <option value="">--Select Page Approver--</option>
-                                        </select>
-                                    </td>
-                                    <td><input type="Number" min="1" class="form-control"></td>
-                                    <td>
-                                        <a href="javascript:void(0)" class="btn btn-success">+</a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <a href="javascript:void(0)"
-                            class="mt-4 save-form btn btn-success text-center border-dashed-top border-dashed-bottom border-dashed-left border-dashed-right border-color-gray">
-                            Save Form
-                        </a>
+                            {{-- </div> --}}
+                            <h5 class="m-0">Set Approver</h5>
+                            <small class="text-info">select user as approver</small>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Approver Name</th>
+                                        <th>Approver (user)</th>
+                                        <th>Set Page Approver</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="approver-append">
+                                    <tr>
+                                        <td><input name="approver-name[]" type="text" class="form-control"></td>
+                                        <td>
+                                            <select name="user-approver[]" id="" class="form-control">
+                                                <option value="">--Select Approver--</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select name="page-approver[]" id="page-approver" class="form-control">
+                                                <option value="">--Select Page Approver--</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0)" class="btn btn-success more-approver">+</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <a href="javascript:void(0)"
+                                class="mt-4 save-form btn btn-success text-center border-dashed-top border-dashed-bottom border-dashed-left border-dashed-right border-color-gray">
+                                Save Form
+                            </a>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -344,10 +348,6 @@
             $('.set').trigger('click')
         })
 
-        window.onbeforeunload = function() {
-            return alert("browser window closing...");
-        };
-
         $(document).on('click', '.del-form', function() {
             $.ajax({
                 url: "{{ route('formBuilder.delform') }}?param= " + $('#html_form').val(),
@@ -387,6 +387,7 @@
                     $(".preloader").fadeOut()
                     $('#formName').modal('hide')
                     $(`div[data-dom]`).html(response.success.data)
+                    $('#param-form').val(response.success.param)
                     formBuild()
                 }
             })
@@ -840,6 +841,40 @@
                     }
                     break;
             }
+        })
+
+        $('#parent-page').on('change', function() {
+            if ($('select[name=parent-page] option').filter(':selected').val() != '') {
+                $.ajax({
+                    url: "{{ route('formBuilder.getpageapprover') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        parent: $('select[name=parent-page] option').filter(':selected').val()
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        $('select[name="page-approver"]').each(function(i) {
+                            $(this).html('<option value="">--Select Page Approver--</option>')
+                            for (let index = 0; index < response.data.length; index++) {
+                                $(this).append('<option value="">' + response.data[index].name +
+                                    '</option>')
+                            }
+                        })
+                    }
+                })
+            }
+        })
+
+        $('.more-approver').on('click', function() {
+            $.ajax({
+                url: "{{ route('formBuilder.moreapprover') }}",
+                type: "get",
+                dataType: "json",
+                success: function(response) {
+                    $('#approver-append').append(response.data)
+                }
+            })
         })
 
         function typefield(field) {

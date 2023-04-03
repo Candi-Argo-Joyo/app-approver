@@ -94,8 +94,21 @@
                                 data-bs-target="#pageMenu">Setting Page Menu</a>
                         </div>
                         <div class="col-md-12">
-                            <ul class="list-group" id="html-group">
-                            </ul>
+                            <table class="table border table-striped table-bordered text-nowrap tb-page"
+                                style="width: 100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Menu (Parent Menu)</th>
+                                        <th>Menu (Child Menu)</th>
+                                        <th>Menu Type</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -128,8 +141,8 @@
                         <label class="form-label" for="type-menu">Type Menu <small class="text-danger">*</small></label>
                         <select name="type-menu" id="type-menu" class="form-control">
                             <option value="">--Select Type Menu--</option>
-                            <option value="dropdown">Dropdown</option>
-                            <option value="singgle">Singgle Menu</option>
+                            <option value="dropdown">Parent Menu</option>
+                            <option value="singgle">Child Menu</option>
                         </select>
                     </div>
                     <div class="form-group mb-3" id="parent" style="display: none">
@@ -182,53 +195,80 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" name="param_group" hidden>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="select_menu">Select Menu <small
-                                class="text-danger">(mandatory)</small></label>
-                        <select name="select_menu" id="select_menu" class="form-control">
-                            <option value="">--Select Menu--</option>
-                        </select>
-                        <div id="invalid-select-menu" class="invalid-feedback">
+                    <form id="page-form">
+                        <input type="text" name="param_group" hidden>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="parent_menu">Select Parent Menu <small
+                                    class="text-danger">(mandatory)</small></label>
+                            <select name="parent_menu" id="parent_menu" class="form-control">
+                                <option value="">--Select Menu--</option>
+                            </select>
+                            <div id="invalid-parent-menu" class="invalid-feedback">
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label">Select menu type <small class="text-danger">(mandatory)</small></label>
-                        <div class="d-flex pe-3 gap-2">
-                            <label class="col-sm-4 p-0 form-label lb" click role="button">
-                                Entry Page <br>
-                                <small>used for entry forms</small>
-                                <div style="border: 1px solid #ddd">
-                                    <img src="{{ asset('images/page/entry.png') }}" alt="entry page" style="width: 100%">
-                                    <input type="radio" name="page" hidden value="">
-                                </div>
-                            </label>
-                            <label class="col-sm-4 p-0 form-label lb" click role="button">
-                                Approver Page <br>
-                                <small>used for form approval</small>
-                                <div style="border: 1px solid #ddd">
-                                    <img src="{{ asset('images/page/approver.png') }}" alt="entry page"
-                                        style="width: 100%">
-                                    <input type="radio" name="page" hidden value="">
-                                </div>
-                            </label>
-                            <label class="col-sm-4 p-0 form-label lb" click role="button">
-                                Report Page <br>
-                                <small>used for data reports</small>
-                                <div style="border: 1px solid #ddd">
-                                    <img src="{{ asset('images/page/report.png') }}" alt="entry page"
-                                        style="width: 100%">
-                                    <input type="radio" name="page" hidden value="">
-                                </div>
-                            </label>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="child_menu">Select Child Menu <small
+                                    class="text-danger">(mandatory)</small></label>
+                            <select name="child_menu" id="child_menu" disabled class="form-control">
+                                <option value="">--Select Menu--</option>
+                            </select>
+                            <div id="invalid-child-menu" class="invalid-feedback">
+                            </div>
                         </div>
-                        <div id="invalid-select-menu" class="invalid-feedback">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Select menu type <small
+                                    class="text-danger">(mandatory)</small></label>
+                            <div class="d-flex pe-3 gap-2">
+                                <label class="col-sm-4 p-0 form-label lb" click role="button">
+                                    Entry Page <br>
+                                    <small>used for entry forms</small>
+                                    <div style="border: 1px solid #ddd">
+                                        <img src="{{ asset('images/page/entry.png') }}" alt="entry page"
+                                            style="width: 100%">
+                                        <input type="radio" name="page" hidden value="Entry Page">
+                                    </div>
+                                </label>
+                                <label class="col-sm-4 p-0 form-label lb" click role="button">
+                                    Approver Page <br>
+                                    <small>used for form approval</small>
+                                    <div style="border: 1px solid #ddd">
+                                        <img src="{{ asset('images/page/approver.png') }}" alt="Approver page"
+                                            style="width: 100%">
+                                        <input type="radio" name="page" hidden value="Approver">
+                                    </div>
+                                </label>
+                                <label class="col-sm-4 p-0 form-label lb" click role="button">
+                                    Report Page <br>
+                                    <small>used for data reports</small>
+                                    <div style="border: 1px solid #ddd">
+                                        <img src="{{ asset('images/page/report.png') }}" alt="Report page"
+                                            style="width: 100%">
+                                        <input type="radio" name="page" hidden value="Report">
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="invalid-select-menu" class="invalid-feedback">
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary save-group">Save changes</button>
+                    <button type="button" class="btn btn-primary save-page-menu">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <div id="viewImage" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="pageMenuLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="pageMenuLabel">View Image</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                </div>
+                <div class="row">
+                    <img src="" id="preview-image" style="width: 100%">
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -239,338 +279,531 @@
     <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
     <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
     <script>
-        getGroup()
-        url()
-        getAllMenu()
-        getSinggleMenu()
+        $(function() {
+            var i = 1;
+            var table = $('.tb-page').DataTable({
+                processing: true,
+                serverSide: true,
+                scrollX: true,
+                autoWidth: false,
+                ajax: "{{ route('pagemenu.datatables') }}",
+                columns: [{
+                        data: 'rownum',
+                        name: 'rownum',
+                        orderable: false,
+                        searchable: false,
+                        width: "5%"
+                    },
+                    {
+                        data: 'name_parent',
+                        name: 'name_parent',
+                        width: "30%"
+                    },
+                    {
+                        data: 'name',
+                        name: 'name',
+                        width: "30%"
+                    },
+                    {
+                        data: 'type',
+                        name: 'type',
+                        width: "25%"
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        width: "5%"
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        width: "5%"
+                    },
+                ]
+            });
 
-        function url() {
-            var url_string = window.location.href;
-            var url = new URL(url_string);
-            var c = url.searchParams.get("data");
-            // console.log(url_string);
+            getGroup()
+            url()
+            getAllMenu()
+            getSinggleMenu()
 
-            switch (c) {
-                case 'add-menu':
-                    menu()
-                    break;
-                case 'add-group-menu':
-                    group()
-                    break;
-                case 'setting-page-menu':
-                    page()
-                    break;
+            function url() {
+                var url_string = window.location.href;
+                var url = new URL(url_string);
+                var c = url.searchParams.get("data");
+                // console.log(url_string);
+
+                switch (c) {
+                    case 'add-menu':
+                        menu()
+                        break;
+                    case 'add-group-menu':
+                        group()
+                        break;
+                    case 'setting-page-menu':
+                        page()
+                        break;
+                }
             }
-        }
 
-        $('.menu').on('click', function() {
-            menu()
-        })
-
-        $('.group').on('click', function() {
-            group()
-        })
-        $('.page').on('click', function() {
-            page()
-        })
-
-        function menu() {
-            $('.menu').removeClass('bg-light').addClass('bg-white')
-            $('.group').removeClass('bg-white').addClass('bg-light')
-            $('.page').removeClass('bg-white').addClass('bg-light')
-
-            $('#menu').show()
-            $('#page').hide()
-            $('#group').hide()
-            window.history.pushState(
-                'page add menu',
-                'add menu', '{{ route('dataMenu') }}?data=add-menu');
-        }
-
-        function group() {
-            $('.group').removeClass('bg-light').addClass('bg-white')
-            $('.menu').removeClass('bg-white').addClass('bg-light')
-            $('.page').removeClass('bg-white').addClass('bg-light')
-
-            $('#menu').hide()
-            $('#page').hide()
-            $('#group').show()
-            window.history.pushState(
-                'page add group menu',
-                'add group menu', '{{ route('dataMenu') }}?data=add-group-menu');
-        }
-
-        function page() {
-            $('.page').removeClass('bg-light').addClass('bg-white')
-            $('.menu').removeClass('bg-white').addClass('bg-light')
-            $('.group').removeClass('bg-white').addClass('bg-light')
-
-            $('#menu').hide()
-            $('#group').hide()
-            $('#page').show()
-            window.history.pushState(
-                'page setting page menu',
-                'setting page menu', '{{ route('dataMenu') }}?data=setting-page-menu');
-        }
-
-        $('label[click]').on('click', function() {
-            $('label[click]').removeClass('border-blue')
-            $(this).addClass('border-blue')
-        })
-
-        $('.create-group').on('click', function() {
-            $('input[name="name_group"]').val('')
-            $('input[name="param_group"]').val('')
-        })
-
-        $('.save-group').on('click', function() {
-            $.ajax({
-                url: "{{ route('dataMenu.savegroup') }}",
-                type: "post",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    group: $('input[name="name_group"]').val(),
-                    param: $('input[name="param_group"]').val()
-                },
-                dataType: "json",
-                success: function(response) {
-                    if (response.error) {
-                        if (response.error.group) {
-                            $('input[name="name_group"]').addClass('is-invalid')
-                            $('#invalid-group').html(response.error.group[0])
-                        } else {
-                            $('input[name="name_group"]').removeClass('is-invalid')
-                            $('#invalid-group').html('')
-                        }
-                    } else {
-                        Swal.fire({
-                            position: 'top-end',
-                            icon: 'success',
-                            title: 'Your work has been saved',
-                            showConfirmButton: false,
-                            toast: true,
-                            timer: 1500
-                        })
-
-                        $('#menuGroup').modal('hide')
-                        getGroup()
-                        getAllMenu()
-                        sidebarShow()
-                    }
-                },
-                error: function(jqXHR, exception) {
-                    Swal.fire(
-                        'The Internet?',
-                        'An error occurred check your internet connection',
-                        'warning'
-                    )
-                },
+            $('.menu').on('click', function() {
+                menu()
             })
-        })
 
-        $(document).on('click', '.edit-group', function() {
-            $.ajax({
-                url: "{{ route('dataMenu.delonegroup') }}",
-                type: "post",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    param: $(this).attr('data-param')
-                },
-                dataType: "json",
-                success: function(response) {
-                    if (response.success) {
-                        $('#menuGroup').modal('show')
-                        $('input[name="name_group"]').val(response.success.name)
-                        $('input[name="param_group"]').val(response.success.id)
-                        return false
-                    }
-                    Swal.fire(
-                        'The Internet?',
-                        response.error,
-                        'question'
-                    )
-                    return false
-                },
-                error: function(jqXHR, exception) {
-                    Swal.fire(
-                        'The Internet?',
-                        'An error occurred check your internet connection',
-                        'warning'
-                    )
-                },
+            $('.group').on('click', function() {
+                group()
             })
-        })
+            $('.page').on('click', function() {
+                page()
+                table.ajax.reload();
+            })
 
-        $(document).on('click', '.del-group', function() {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "{{ route('dataMenu.delgroup') }}",
-                        type: "post",
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            param: $(this).attr('data-param')
-                        },
-                        dataType: "json",
-                        success: function(response) {
-                            if (response.success) {
-                                Swal.fire({
-                                    position: 'top-end',
-                                    icon: 'success',
-                                    title: response.success,
-                                    showConfirmButton: false,
-                                    toast: true,
-                                    timer: 1500
-                                })
+            function menu() {
+                $('.menu').removeClass('bg-light').addClass('bg-white')
+                $('.group').removeClass('bg-white').addClass('bg-light')
+                $('.page').removeClass('bg-white').addClass('bg-light')
 
-                                getGroup()
-                                sidebarShow()
-                                return false
+                $('#menu').show()
+                $('#page').hide()
+                $('#group').hide()
+                window.history.pushState(
+                    'page add menu',
+                    'add menu', '{{ route('dataMenu') }}?data=add-menu');
+            }
+
+            function group() {
+                $('.group').removeClass('bg-light').addClass('bg-white')
+                $('.menu').removeClass('bg-white').addClass('bg-light')
+                $('.page').removeClass('bg-white').addClass('bg-light')
+
+                $('#menu').hide()
+                $('#page').hide()
+                $('#group').show()
+                window.history.pushState(
+                    'page add group menu',
+                    'add group menu', '{{ route('dataMenu') }}?data=add-group-menu');
+            }
+
+            function page() {
+                $('.page').removeClass('bg-light').addClass('bg-white')
+                $('.menu').removeClass('bg-white').addClass('bg-light')
+                $('.group').removeClass('bg-white').addClass('bg-light')
+
+                $('#menu').hide()
+                $('#group').hide()
+                $('#page').show()
+                window.history.pushState(
+                    'page setting page menu',
+                    'setting page menu', '{{ route('dataMenu') }}?data=setting-page-menu');
+            }
+
+            $('label[click]').on('click', function() {
+                $('label[click]').removeClass('border-blue')
+                $(this).addClass('border-blue')
+            })
+
+            $('.create-group').on('click', function() {
+                $('input[name="name_group"]').val('')
+                $('input[name="param_group"]').val('')
+            })
+
+            $('.save-group').on('click', function() {
+                $.ajax({
+                    url: "{{ route('dataMenu.savegroup') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        group: $('input[name="name_group"]').val(),
+                        param: $('input[name="param_group"]').val()
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.error) {
+                            if (response.error.group) {
+                                $('input[name="name_group"]').addClass('is-invalid')
+                                $('#invalid-group').html(response.error.group[0])
+                            } else {
+                                $('input[name="name_group"]').removeClass('is-invalid')
+                                $('#invalid-group').html('')
                             }
-                            Swal.fire(
-                                'The Internet?',
-                                response.error,
-                                'question'
-                            )
+                        } else {
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Your work has been saved',
+                                showConfirmButton: false,
+                                toast: true,
+                                timer: 1500
+                            })
+
+                            $('#menuGroup').modal('hide')
+                            getGroup()
+                            getAllMenu()
+                            sidebarShow()
+                        }
+                    },
+                    error: function(jqXHR, exception) {
+                        Swal.fire(
+                            'The Internet?',
+                            'An error occurred check your internet connection',
+                            'warning'
+                        )
+                    },
+                })
+            })
+
+            $(document).on('click', '.edit-group', function() {
+                $.ajax({
+                    url: "{{ route('dataMenu.delonegroup') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        param: $(this).attr('data-param')
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.success) {
+                            $('#menuGroup').modal('show')
+                            $('input[name="name_group"]').val(response.success.name)
+                            $('input[name="param_group"]').val(response.success.id)
                             return false
-                        },
-                        error: function(jqXHR, exception) {
-                            Swal.fire(
-                                'The Internet?',
-                                'An error occurred check your internet connection',
-                                'warning'
-                            )
-                        },
-                    })
-                }
+                        }
+                        Swal.fire(
+                            'The Internet?',
+                            response.error,
+                            'question'
+                        )
+                        return false
+                    },
+                    error: function(jqXHR, exception) {
+                        Swal.fire(
+                            'The Internet?',
+                            'An error occurred check your internet connection',
+                            'warning'
+                        )
+                    },
+                })
             })
-        })
 
-        $('#menu-group').on('change', function() {
-            $.ajax({
-                url: "{{ route('dataMenu.getParentMenu') }}",
-                type: "post",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    id_group: $('select[name=menu-group] option').filter(':selected').val()
-                },
-                dataType: "json",
-                success: function(response) {
-                    $('#parent-menu').html('<option value="">--Select Menu--</option>')
-                    for (let index = 0; index < response.data.length; index++) {
-                        $('#parent-menu').append('<option value="' + response.data[index].id + '">' +
-                            response
-                            .data[index].name + '</option>')
+            $(document).on('click', '.del-group', function() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('dataMenu.delgroup') }}",
+                            type: "post",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                param: $(this).attr('data-param')
+                            },
+                            dataType: "json",
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: response.success,
+                                        showConfirmButton: false,
+                                        toast: true,
+                                        timer: 1500
+                                    })
+
+                                    getGroup()
+                                    sidebarShow()
+                                    return false
+                                }
+                                Swal.fire(
+                                    'The Internet?',
+                                    response.error,
+                                    'question'
+                                )
+                                return false
+                            },
+                            error: function(jqXHR, exception) {
+                                Swal.fire(
+                                    'The Internet?',
+                                    'An error occurred check your internet connection',
+                                    'warning'
+                                )
+                            },
+                        })
                     }
+                })
+            })
+
+            $('#menu-group').on('change', function() {
+                $.ajax({
+                    url: "{{ route('dataMenu.getParentMenu') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        id_group: $('select[name=menu-group] option').filter(':selected').val()
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        $('#parent-menu').html('<option value="">--Select Menu--</option>')
+                        for (let index = 0; index < response.data.length; index++) {
+                            $('#parent-menu').append('<option value="' + response.data[index]
+                                .id + '">' +
+                                response
+                                .data[index].name + '</option>')
+                        }
+                    }
+                })
+            })
+
+            $('#type-menu').on('change', function() {
+                if ($('select[name=type-menu] option').filter(':selected').val() != 'dropdown') {
+                    $('#parent').show()
+                } else {
+                    $('#parent').hide()
+                    $('#parent-menu').prop('selectedIndex', 0);
                 }
             })
-        })
 
-        $('#type-menu').on('change', function() {
-            if ($('select[name=type-menu] option').filter(':selected').val() != 'dropdown') {
-                $('#parent').show()
-            } else {
-                $('#parent').hide()
-                $('#parent-menu').prop('selectedIndex', 0);
-            }
-        })
-
-        $('.save-menu').on('click', function() {
-            if ($('select[name=menu-group] option').filter(':selected').val() == '') {
-                Swal.fire(
-                    'Ups!',
-                    'group menu cannot be empty',
-                    'warning'
-                )
-                return false
-            }
-
-            if ($('input[name=name-menu]').val() == '') {
-                Swal.fire(
-                    'Ups!',
-                    'menu name cannot be empty',
-                    'warning'
-                )
-                return false
-            }
-
-            if ($('select[name=type-menu] option').filter(':selected').val() == '') {
-                Swal.fire(
-                    'Ups!',
-                    'menu type cannot be empty',
-                    'warning'
-                )
-                return false
-            }
-
-            if ($('select[name=type-menu] option').filter(':selected').val() == 'singgle') {
-                if ($('select[name=parent-menu] option').filter(':selected').val() == '') {
+            $('.save-menu').on('click', function() {
+                if ($('select[name=menu-group] option').filter(':selected').val() == '') {
                     Swal.fire(
                         'Ups!',
-                        'parent menu cannot be empty',
+                        'group menu cannot be empty',
                         'warning'
                     )
                     return false
                 }
-            }
 
-            $.ajax({
-                url: "{{ route('dataMenu.saveMenu') }}",
-                type: "post",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    id_group: $('select[name=menu-group] option').filter(':selected').val(),
-                    name: $('input[name="name-menu"]').val(),
-                    type: $('select[name=type-menu] option').filter(':selected').val(),
-                    parent: $('select[name=parent-menu] option').filter(':selected').val(),
-                    param_menu: $('input[name="param-menu"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        Swal.fire({
-                            position: 'top-end',
-                            icon: 'success',
-                            title: response.success,
-                            showConfirmButton: false,
-                            toast: true,
-                            timer: 1500
-                        })
+                if ($('input[name=name-menu]').val() == '') {
+                    Swal.fire(
+                        'Ups!',
+                        'menu name cannot be empty',
+                        'warning'
+                    )
+                    return false
+                }
 
-                        $('#menuModal').modal('hide')
-                        getAllMenu()
-                        getSinggleMenu()
-                        sidebarShow()
-                    } else {
-                        if (response.error.msg) {
+                if ($('select[name=type-menu] option').filter(':selected').val() == '') {
+                    Swal.fire(
+                        'Ups!',
+                        'menu type cannot be empty',
+                        'warning'
+                    )
+                    return false
+                }
+
+                if ($('select[name=type-menu] option').filter(':selected').val() == 'singgle') {
+                    if ($('select[name=parent-menu] option').filter(':selected').val() == '') {
+                        Swal.fire(
+                            'Ups!',
+                            'parent menu cannot be empty',
+                            'warning'
+                        )
+                        return false
+                    }
+                }
+
+                $.ajax({
+                    url: "{{ route('dataMenu.saveMenu') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        id_group: $('select[name=menu-group] option').filter(':selected').val(),
+                        name: $('input[name="name-menu"]').val(),
+                        type: $('select[name=type-menu] option').filter(':selected').val(),
+                        parent: $('select[name=parent-menu] option').filter(':selected').val(),
+                        param_menu: $('input[name="param-menu"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: response.success,
+                                showConfirmButton: false,
+                                toast: true,
+                                timer: 1500
+                            })
+
+                            $('#menuModal').modal('hide')
+                            getAllMenu()
+                            getSinggleMenu()
+                            sidebarShow()
+                        } else {
+                            if (response.error.msg) {
+                                Swal.fire(
+                                    'Ups?',
+                                    response.error.msg,
+                                    'question'
+                                )
+                            }
+                        }
+                    }
+                })
+            })
+
+            $('#parent_menu').change(function() {
+                $.ajax({
+                    url: "{{ route('dataMenu.pageParentMenu') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        param: $(this).val()
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.success) {
+                            if (response.success.data.length < 1) {
+                                $('#child_menu').prop('disabled', true)
+                                $('#child_menu').html(
+                                    '<option value="">--Select Child Menu--</option>')
+                                Swal.fire(
+                                    'Ups?',
+                                    'Child menu not yet created',
+                                    'warning'
+                                )
+                            } else {
+                                $('#child_menu').prop('disabled', false)
+                                $('#child_menu').html(
+                                    '<option value="">--Select Child Menu--</option>')
+                                for (let index = 0; index < response.success.data
+                                    .length; index++) {
+                                    $('#child_menu').append('<option value="' + response.success
+                                        .data[index]
+                                        .id + '">' + response.success.data[index]
+                                        .name + '</option>')
+                                }
+                            }
+                        } else {
+                            $('#child_menu').prop('disabled', true)
+                            $('#child_menu').html(
+                                '<option value="">--Select Child Menu--</option>')
                             Swal.fire(
                                 'Ups?',
-                                response.error.msg,
-                                'question'
+                                'Child menu not found',
+                                'warning'
                             )
                         }
                     }
-                }
+                })
             })
-        })
 
-        function getGroup() {
-            $.ajax({
-                url: "{{ route('dataMenu.getGroupAll') }}",
-                type: "get",
-                dataType: "json",
-                success: function(response) {
-                    $('#html-group').html('')
-                    $('#menu-group').html('<option value="">--Select Group--</option>')
-                    for (let index = 0; index < response.data.length; index++) {
-                        $('#html-group').append(`
+            $('.create-page').on('click', function() {
+                $('#page-form').trigger("reset");
+                $('#child_menu').prop('disabled', true)
+                $('#child_menu').html('<option value="">--Select Child Menu--</option>')
+            })
+
+            $('.save-page-menu').on('click', function() {
+                $.ajax({
+                    url: "{{ route('dataMenu.savePageMenu') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        parent: $('select[name=parent_menu] option').filter(':selected').val(),
+                        child: $('select[name=child_menu] option').filter(':selected').val(),
+                        page: $('input[name="page"]:checked').val(),
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.error) {
+                            if (response.error.parent) {
+                                $('select[name="parent_menu"]').addClass('is-invalid')
+                                $('#invalid-parent-menu').html(response.error.parent[0])
+                            } else {
+                                $('select[name="parent_menu"]').removeClass('is-invalid')
+                                $('#invalid-parent-menu').html('')
+                            }
+
+                            if (response.error.child) {
+                                $('select[name="child_menu"]').addClass('is-invalid')
+                                $('#invalid-child-menu').html(response.error.child[0])
+                            } else {
+                                $('select[name="child_menu"]').removeClass('is-invalid')
+                                $('#invalid-child-menu').html('')
+                            }
+
+                            if (response.error.page) {
+                                Swal.fire(
+                                    'Ups!',
+                                    'please select menu type',
+                                    'warning'
+                                )
+                            }
+
+                            if (response.error.msg) {
+                                Swal.fire(
+                                    'Ups!',
+                                    response.error.msg,
+                                    'warning'
+                                )
+                            }
+                        } else {
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: response.success,
+                                showConfirmButton: false,
+                                toast: true,
+                                timer: 1500
+                            })
+
+                            $('#pageMenu').modal('hide')
+                            sidebarShow()
+                            table.ajax.reload();
+                        }
+                    }
+                })
+            })
+
+            $(document).on('click', 'a[preview]', function() {
+                let image = $(this).attr('asset')
+                $('#preview-image').attr('src', image)
+            })
+
+            $(document).on('click', '.change-status', function() {
+                let status = $(this).attr('status')
+                let text = ''
+                if (status == 'true') {
+                    text = 'You will change this status to non active'
+                } else {
+                    text = 'You will change this status to active'
+                }
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: text,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, confirm!'
+                }).then((result) => {
+                    if (result.isConfirmed) {}
+                })
+            })
+
+            function getGroup() {
+                $.ajax({
+                    url: "{{ route('dataMenu.getGroupAll') }}",
+                    type: "get",
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.count_group < 1) {
+                            $('#html-group').html(
+                                '<div class="h2 text-center p-4" style="background:#f1f1f1">Please create a menu group first</div>'
+                            )
+                        } else {
+                            $('#html-group').html('')
+                            $('#menu-group').html('<option value="">--Select Group--</option>')
+                            for (let index = 0; index < response.data.length; index++) {
+                                $('#html-group').append(`
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                            <strong>${response.data[index].name}</strong>
                             <span>
@@ -579,57 +812,72 @@
                             </span>
                         </li>`)
 
-                        $('#menu-group').append(
-                            `<option value="${response.data[index].id}">${response.data[index].name}</option>`
+                                $('#menu-group').append(
+                                    `<option value="${response.data[index].id}">${response.data[index].name}</option>`
+                                )
+                            }
+                        }
+                    },
+                    error: function(jqXHR, exception) {
+                        Swal.fire(
+                            'The Internet?',
+                            'An error occurred check your internet connection',
+                            'warning'
                         )
+                    },
+                })
+            }
+
+            function getAllMenu() {
+                $.ajax({
+                    url: "{{ route('dataMenu.getAllMenu') }}",
+                    type: "get",
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.count_group < 1) {
+                            $('#show-menu').html(
+                                '<div class="h2 text-center p-4" style="background:#f1f1f1">Please create a menu group first</div>'
+                            )
+                        } else {
+                            if (response.count_menu < 1) {
+                                $('#show-menu').html(
+                                    '<div class="h2 text-center p-4" style="background:#f1f1f1">Please create a menu</div>'
+                                )
+                            } else {
+                                $('#show-menu').html(response.html)
+                            }
+                        }
                     }
-                },
-                error: function(jqXHR, exception) {
-                    Swal.fire(
-                        'The Internet?',
-                        'An error occurred check your internet connection',
-                        'warning'
-                    )
-                },
-            })
-        }
+                })
+            }
 
-        function getAllMenu() {
-            $.ajax({
-                url: "{{ route('dataMenu.getAllMenu') }}",
-                type: "get",
-                dataType: "json",
-                success: function(response) {
-                    $('#show-menu').html(response.html)
-                }
-            })
-        }
-
-        function getSinggleMenu() {
-            $.ajax({
-                url: "{{ route('dataMenu.getSinggleMenu') }}",
-                type: "get",
-                dataType: "json",
-                success: function(response) {
-                    $('#select_menu').html('<option value="">--Select Menu--</option>')
-                    for (let index = 0; index < response.data.length; index++) {
-                        $('#select_menu').append('<option value="' + response.data[index].id + '">' + response
-                            .data[index].name + '</option>')
+            function getSinggleMenu() {
+                $.ajax({
+                    url: "{{ route('dataMenu.getSinggleMenu') }}",
+                    type: "get",
+                    dataType: "json",
+                    success: function(response) {
+                        $('#parent_menu').html('<option value="">--Select Menu--</option>')
+                        for (let index = 0; index < response.data.length; index++) {
+                            $('#parent_menu').append('<option value="' + response.data[index].id +
+                                '">' + response
+                                .data[index].name + '</option>')
+                        }
                     }
-                }
-            })
-        }
+                })
+            }
 
-        function sidebarShow() {
-            $.ajax({
-                url: "{{ route('dataMenu.sidebar') }}",
-                type: "get",
-                dataType: "json",
-                success: function(response) {
-                    $('ul[id="sidebarnav"]').html(response.data)
-                    $('div[data-sidebar]').html(response.script)
-                }
-            })
-        }
+            function sidebarShow() {
+                $.ajax({
+                    url: "{{ route('dataMenu.sidebar') }}",
+                    type: "get",
+                    dataType: "json",
+                    success: function(response) {
+                        $('ul[id="sidebarnav"]').html(response.data)
+                        $('div[data-sidebar]').html(response.script)
+                    }
+                })
+            }
+        })
     </script>
 @endsection

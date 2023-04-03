@@ -33,7 +33,7 @@ return [
             'hosts' => [env('LDAP_HOST', $ldap['default']['hosts'])],
             'username' => env('LDAP_USERNAME', $ldap['default']['username']),
             'password' => env('LDAP_PASSWORD', $ldap['default']['password']),
-            'port' => env('LDAP_PORT', 389),
+            'port' => env('LDAP_PORT', $ldap['default']['port']),
             'base_dn' => env('LDAP_BASE_DN', $ldap['default']['base_dn']),
             'timeout' => env('LDAP_TIMEOUT', $ldap['default']['timeout']),
             'use_ssl' => env('LDAP_SSL', $ldap['default']['use_ssl']),
@@ -53,8 +53,6 @@ return [
     */
 
     'logging' => env('LDAP_LOGGING', true),
-
-    'logging_channel' => env('LOG_CHANNEL', 'stack'),
 
     /*
     |--------------------------------------------------------------------------

@@ -48,30 +48,40 @@
                         <div class="text-center">
                             <img src="../images/KDDI_Logo.svg.png" style="width: 120px" alt="wrapkit">
                         </div>
-                        <h2 class="mt-3 text-center">Login User</h2>
-                        <p class="text-center">Enter your username and password to access application.</p>
-                        <form class="mt-4">
+                        <h2 class="mt-3 text-center">Login Admin</h2>
+                        {{-- <p class="text-center">Enter your username and password to access application.</p> --}}
+                        <form method="POST" action="{{ route('login') }}" class="mt-4">
+                            @csrf
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3">
-                                        <label class="form-label text-dark" for="uname">Username</label>
-                                        <input class="form-control" id="uname" type="text"
-                                            placeholder="enter your username">
+                                        <label class="form-label text-dark" for="username">Username</label>
+                                        <input id="username" type="text"
+                                            class="form-control @error('username') is-invalid @enderror" name="username"
+                                            value="{{ old('username') }}" required autocomplete="username" autofocus>
+                                        @error('username')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="form-group mb-3">
                                         <label class="form-label text-dark" for="pwd">Password</label>
-                                        <input class="form-control" id="pwd" type="password"
-                                            placeholder="enter your password">
+                                        <input id="password" type="password"
+                                            class="form-control @error('password') is-invalid @enderror" name="password"
+                                            required autocomplete="current-password">
+                                        @error('password')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="col-lg-12 mt-3 text-center">
                                     <button type="submit" class="btn w-100 btn-dark">Login</button>
                                 </div>
-                                {{-- <div class="col-lg-12 text-center mt-5">
-                                    Don't have an account? <a href="#" class="text-danger">Sign Up</a>
-                                </div> --}}
                             </div>
                         </form>
                     </div>

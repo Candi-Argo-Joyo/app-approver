@@ -17,7 +17,7 @@ class DataMenu extends Controller
     public function getGroupAll()
     {
         $data = DB::table('menu_group')->get();
-        return response()->json(['data' => $data]);
+        return response()->json(['data' => $data, 'count_group' => count($data)]);
     }
 
     public function saveGroup(Request $request)
@@ -111,6 +111,7 @@ class DataMenu extends Controller
                     DB::table('menu')->where('id', $request->param_menu)->update([
                         'id_menu_group' => $request->id_group,
                         'name' => $request->name,
+                        'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
                         'type' => 'dropdown',
                         'updated_at' => date('Y-m-d H:i:s')
                     ]);
@@ -118,6 +119,7 @@ class DataMenu extends Controller
                     DB::table('menu')->insert([
                         'id_menu_group' => $request->id_group,
                         'name' => $request->name,
+                        'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
                         'type' => 'dropdown',
                         'parent' => '0',
                         'created_at' => date('Y-m-d H:i:s')
@@ -128,6 +130,7 @@ class DataMenu extends Controller
                     DB::table('menu')->where('id', $request->param_menu)->update([
                         'id_menu_group' => $request->id_group,
                         'name' => $request->name,
+                        'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
                         'type' => 'singgle',
                         'parent' => $request->parent,
                         'updated_at' => date('Y-m-d H:i:s')
@@ -136,6 +139,7 @@ class DataMenu extends Controller
                     DB::table('menu')->insert([
                         'id_menu_group' => $request->id_group,
                         'name' => $request->name,
+                        'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
                         'type' => 'singgle',
                         'parent' => $request->parent,
                         'created_at' => date('Y-m-d H:i:s')
@@ -161,10 +165,11 @@ class DataMenu extends Controller
     {
         $group = DB::table('menu_group')->get();
         $html = '<ul class="list-group">';
+        $parent = [];
 
         foreach ($group as $g) {
             $html .= '<li class="list-group-item d-flex justify-content-between align-items-center">
-                        <strong>' . $g->name . '</strong>
+                        <strong>[group] ' . $g->name . '</strong>
                       </li>';
             $parent = DB::table('menu')->where('id_menu_group', $g->id)->where('parent', '0')->get();
             foreach ($parent as $p) {
@@ -172,7 +177,7 @@ class DataMenu extends Controller
                                     style="margin-left: 30px">
                                     <span class="d-flex align-items-center gap-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text feather-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                        ' . $p->name . '
+                                        [parent] ' . $p->name . '
                                     </span>
                                     <span>
                                         <a href="javascript:void(0)" class="badge bg-warning badge-pill">edit</a>
@@ -183,7 +188,7 @@ class DataMenu extends Controller
                 foreach ($menu as $m) {
                     $html .= '<li class="list-group-item d-flex justify-content-between align-items-center"
                                     style="margin-left: 60px">
-                                    <a href="javascript:void(0)">' . $m->name . '</a>
+                                    <a href="javascript:void(0)">[child] ' . $m->name . '</a>
                                     <span>
                                         <a href="javascript:void(0)" class="badge bg-warning badge-pill">edit</a>
                                         <a href="javascript:void(0)" class="badge bg-danger badge-pill">delete</a>
@@ -193,13 +198,79 @@ class DataMenu extends Controller
             }
         }
         $html .= '</ul>';
-        return response()->json(['html' => $html]);
+        return response()->json(['html' => $html, 'count_group' => count($group), 'count_menu' => count($parent)]);
     }
 
     public function getSinggleMenu()
     {
-        $menu = DB::table('menu')->where('parent', '1')->get();
+        $menu = DB::table('menu')->where('parent', '0')->get();
         return response()->json(['data' => $menu]);
+    }
+
+    public function pageParentMenu(Request $request)
+    {
+        $validasi = DB::table('menu')->where('parent', $request->param)->where('page', NULL)->get();
+        if ($validasi) {
+            return response()->json(['success' => ['data' => $validasi]]);
+        }
+        return response()->json(['error' => ['msg' => 'Parent menu not found']]);
+    }
+
+    public function savePageMenu(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'parent' => 'required|integer|regex:/^([0-9]+)$/|not_in:0',
+                'child' => 'required|integer|regex:/^([0-9]+)$/|not_in:0',
+                'page' => 'required',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors()
+            ]);
+        }
+
+        $validate = DB::table('menu')->where('id', $request->child)->first();
+
+        if (!$validate) {
+            return response()->json([
+                'error' => ['msg' => 'Ups someting wrong']
+            ]);
+        }
+
+        $group = DB::table('menu_group')->where('id', $validate->id_menu_group)->first();
+        $parent = DB::table('menu')->where('id', $validate->parent)->first();
+
+        // merubah status grup
+        if ($group->status == 'non-active') {
+            DB::table('menu_group')->where('id', $validate->id_menu_group)->update([
+                'status' => 'active',
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        // merubah status parent menu
+        if ($parent->status == 'non-active') {
+            DB::table('menu')->where('id', $validate->parent)->update([
+                'status' => 'active',
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+
+        // merubah status dan jenis halaman child
+        DB::table('menu')->where('id', $validate->id)->update([
+            'page' => $request->page,
+            'status' => 'active',
+            'name_parent' => $parent->name,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        return response()->json([
+            'success' => 'The menu page has been successfully saved'
+        ]);
     }
 
     public function sidebar()
@@ -209,11 +280,11 @@ class DataMenu extends Controller
                         <i class="icon-home font-700"></i>
                         <span class="hide-menu">Dashboard</span>
                     </a>
-                </li>
-                <li class="list-divider"></li>
+                </li>';
+        if (Auth::user()->role == 'administrator') {
+            $html .= '<li class="list-divider"></li>
                 <li class="nav-small-cap"><span class="hide-menu">Master</span></li>
-                <li
-                    class="sidebar-item">
+                <li class="sidebar-item">
                     <a class="sidebar-link has-arrow"
                         href="javascript:void(0)" aria-expanded="false">
                             <i class="icon-notebook font-700"></i>
@@ -250,102 +321,69 @@ class DataMenu extends Controller
                             </a>
                         </li>
                     </ul>
-                </li>
-                <li class="list-divider"></li>
-                <li class="nav-small-cap"><span class="hide-menu">Credit</span></li>
-                <li class="sidebar-item">
-                    <a class="sidebar-link has-arrow"
-                        href="javascript:void(0)" aria-expanded="false">
-                        <i class="icon-notebook font-700"></i>
-                        <span class="hide-menu">Credit Transaction
-                        </span>
-                    </a>
-                    <ul aria-expanded="false"
-                        class="collapse first-level base-level-line">
-                        <li class="sidebar-item">
-                            <a href="' . route('entryKredit') . '" class="sidebar-link">
-                                <span class="hide-menu"> Entry Kredit </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="' . route('knowledge') . '" class="sidebar-link">
-                                <span class="hide-menu"> Acknowledge by </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="' . route('approver1') . '" class="sidebar-link">
-                                <span class="hide-menu"> Approver 1 </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="' . route('approver2') . '" class="sidebar-link">
-                                <span class="hide-menu"> Approver 2 </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="' . route('approver3') . '" class="sidebar-link">
-                                <span class="hide-menu"> Approver 3 </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="' . route('dataKredit') . '" class="sidebar-link">
-                                <span class="hide-menu"> Data Kredit </span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="list-divider"></li>
-                <li class="nav-small-cap"><span class="hide-menu">Memo</span></li>
-                <li class="sidebar-item">
-                    <a class="sidebar-link" href="' . route('createMemo') . '" aria-expanded="false">
-                        <i class="icon-pencil font-700"></i>
-                        <span class="hide-menu">Create
-                            Memo</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a class="sidebar-link" href="' . route('approvalMemo') . '" aria-expanded="false">
-                        <i class="icon-check font-700"></i>
-                        <span class="hide-menu">Approval
-                            Memo</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a class="sidebar-link" href="' . route('dataMemo') . '" aria-expanded="false">
-                        <i class="icon-notebook font-700"></i>
-                        <span class="hide-menu">Data Memo</span>
-                    </a>
-                </li>';
-        $group = DB::table('menu_group')->get();
-        foreach ($group as $g) {
-            $html .= '<li class="list-divider"></li>
-                      <li class="nav-small-cap"><span class="hide-menu">' . $g->name . '</span></li>
-                      <li class="sidebar-item">';
+            </li>';
+            $group = DB::table('menu_group')->where('status', 'active')->get();
+            foreach ($group as $g) {
+                $html .= '<li class="list-divider"></li>
+                         <li class="nav-small-cap"><span class="hide-menu">' . $g->name . '</span></li>';
 
-            $parent = DB::table('menu')->where('id_menu_group', $g->id)->where('parent', '0')->get();
-            foreach ($parent as $p) {
-                $html .= '<a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                $parent = DB::table('menu')->where('id_menu_group', $g->id)->where('parent', '0')->where('status', 'active')->get();
+                foreach ($parent as $p) {
+                    $html .= '<li class="sidebar-item">';
+                    $html .= '<a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
                               <i class="icon-notebook font-700"></i>
                               <span class="hide-menu">' . $p->name . ' </span>
                           </a>
                           <ul aria-expanded="false" class="collapse first-level base-level-line">';
-                $menu = DB::table('menu')->where('parent', $p->id)->get();
 
-                foreach ($menu as $m) {
-                    $html .= '<li class="sidebar-item">
+                    $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->get();
+                    foreach ($menu as $m) {
+                        $html .= '<li class="sidebar-item">
+                                    <a href="' . route('pages') . '?menu=' . $m->slug . '" class="sidebar-link">
+                                        <span class="hide-menu"> ' . $m->name . ' </span>
+                                    </a>
+                                </li>';
+                    }
+                    $html .= '</ul>';
+                    $html .= '</li>';
+                }
+            }
+        } else {
+            if (Auth::user()->id_divisi != NULL) {
+                $group = DB::table('menu_group')->where('status', 'active')->get();
+                foreach ($group as $g) {
+                    $html .= '<li class="list-divider"></li>
+                              <li class="nav-small-cap"><span class="hide-menu">' . $g->name . '</span></li>';
+
+                    $parent = DB::table('menu')->where('id_menu_group', $g->id)->where('parent', '0')->where('status', 'active')->get();
+                    foreach ($parent as $p) {
+                        $html .= '<li class="sidebar-item">';
+                        $html .= '<a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+                              <i class="icon-notebook font-700"></i>
+                              <span class="hide-menu">' . $p->name . ' </span>
+                          </a>
+                          <ul aria-expanded="false" class="collapse first-level base-level-line">';
+                        $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->get();
+
+                        foreach ($menu as $m) {
+                            $html .= '<li class="sidebar-item">
                                     <a href="#" class="sidebar-link">
                                         <span class="hide-menu"> ' . $m->name . ' </span>
                                     </a>
                                 </li>';
+                        }
+                        $html .= '</ul>';
+                        $html .= '</li>';
+                    }
                 }
-                $html .= '</ul>';
             }
-            $html .= '</li>';
         }
+
         $data = [
             'data' => $html,
             'script' => "<script data-sidebar src=" . asset('dist/js/sidebarmenu.js') . "></script>"
         ];
+
         return json_encode($data);
     }
 }

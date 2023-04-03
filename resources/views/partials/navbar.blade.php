@@ -100,7 +100,6 @@
                         <a class="dropdown-item" href="{{ route('settingweb') }}">Setting SSO/WEB</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ route('dataMenu') }}">Data Menu</a>
-                        <a class="dropdown-item" href="#">Setup Menu</a>
                     </div>
                 </li>
                 <li class="nav-item d-none d-md-block">
@@ -140,9 +139,13 @@
                             My Profile</a>
                         <div class="dropdown-divider"></div>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="javascript:void(0)"><i data-feather="power"
-                                class="svg-icon me-2 ms-1"></i>
+                        <a class="dropdown-item" href="javascript:void(0)"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i
+                                data-feather="power" class="svg-icon me-2 ms-1"></i>
                             Logout</a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            @csrf
+                        </form>
                         <div class="dropdown-divider"></div>
                     </div>
                 </li>

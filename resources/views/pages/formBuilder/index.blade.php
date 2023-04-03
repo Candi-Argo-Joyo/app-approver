@@ -37,13 +37,13 @@
                     <div class="card-body">
                         <h4 class="card-title">List Data Form</h4>
                         <div class="table-responsive">
-                            <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
+                            <table class="table border table-striped table-bordered text-nowrap tb-form">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Form Name</th>
+                                        <th style="width: 20%">Form Name</th>
                                         <th>Status</th>
-                                        <th>Action</th>
+                                        <th style="width: 12px">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -52,12 +52,22 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $f->form_name }}</td>
                                             <td>{{ $f->status }}</td>
-                                            <td>
+                                            <td style="width: 12px">
+                                                <a href="javascript:void(0)" class="btn btn-info" data-bs-toggle="modal"
+                                                    data-bs-target="#myModal">
+                                                    <i class="fas fa-cog"></i>
+                                                </a>
                                                 <a href="{{ route('formBuilder.preview') }}?form={{ $f->id }}"
-                                                    class="badge bg-info">Preview</a>
+                                                    class="btn btn-success">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
                                                 <a href="{{ route('formBuilder.add') }}?form={{ $f->id }}"
-                                                    class="badge bg-warning">Edit</a>
-                                                <a href="javascript:void(0)" class="badge bg-danger">Delete</a>
+                                                    class="btn btn-warning">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </a>
+                                                <a href="javascript:void(0)" class="btn btn-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -71,9 +81,86 @@
         <!-- End Top Leader Table -->
     </div>
     <!--End Container fluid  -->
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Add Condition Form</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="name">Select Field to Condition</label>
+                        <select name="" id="" class="form-control">
+                            <option value="">--Select Field--</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="name">Condition</label>
+                        {{-- <div class="w-100">
+                            <a href="javascript:void(0)" class="btn btn-primary w-100">Add Condition</a>
+                        </div> --}}
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <input class="form-control" type="text" id="name" required=""
+                                    placeholder="Division Name" value="if" disabled>
+                            </div>
+                            <div class="col-md-6 p-0">
+                                <input class="form-control" type="text" id="name" required=""
+                                    placeholder="Amount">
+                            </div>
+                            <div class="col-md-3">
+                                <select name="" id="" class="form-control text-center">
+                                    <option value="">--Comparison--</option>
+                                    <option value=""> > </option>
+                                    <option value="">
+                                        < </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <input class="form-control" type="text" id="name" required=""
+                                    placeholder="Division Name" value="must pass" disabled>
+                            </div>
+                            <div class="col-md-9">
+                                <select name="" id="" class="form-control">
+                                    <option value="">--Select Approval--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
 @endsection
 @section('script')
     <script src="../assets/extra-libs/datatables.net/js/jquery.dataTables.min.js"></script>
     <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
     <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
+    <script>
+        $('.tb-form').DataTable({
+            serverSide: false,
+            scrollX: true,
+            autoWidth: true,
+            columns: [{
+                    width: "1%"
+                },
+                {
+                    width: "30%"
+                },
+                {
+                    width: "15%"
+                },
+                {
+                    width: "5%"
+                },
+            ],
+        });
+    </script>
 @endsection

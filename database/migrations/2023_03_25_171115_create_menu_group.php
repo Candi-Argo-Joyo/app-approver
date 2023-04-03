@@ -16,6 +16,7 @@ class CreateMenuGroup extends Migration
         Schema::create('menu_group', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->enum('status', ['active', 'non-active'])->default('non-active');
             $table->timestamps();
         });
     }
