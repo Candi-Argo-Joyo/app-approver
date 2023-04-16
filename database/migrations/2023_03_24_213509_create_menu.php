@@ -15,16 +15,18 @@ class CreateMenu extends Migration
     {
         Schema::create('menu', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_menu_group');
-            $table->integer('id_html_form')->nullable();
-            $table->integer('id_user_approver')->nullable();
+            $table->bigInteger('id_menu_group');
+            $table->bigInteger('id_html_form')->nullable();
+            $table->bigInteger('id_user_approver')->nullable();
+            $table->bigInteger('id_divisi')->nullable();
             $table->string('name');
             $table->string('slug');
             $table->string('type');
-            $table->integer('parent')->default(0);
+            $table->bigInteger('parent')->default(0);
             $table->string('name_parent')->nullable();
             $table->string('page')->nullable();
             $table->enum('status', ['active', 'non-active'])->default('non-active');
+            $table->enum('is_use', ['yes', 'no'])->default('no');
             $table->timestamps();
         });
     }

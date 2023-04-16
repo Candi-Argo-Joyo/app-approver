@@ -10,6 +10,7 @@ class Dashboard extends Controller
 {
     public function index()
     {
+        \LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
         return view('pages/dashboard/index');
     }
 }

@@ -3,6 +3,7 @@
 @section('css')
     <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
     <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/select2/css/select2.css') }}">
 @endsection
 @section('content')
     <style>
@@ -14,6 +15,32 @@
         .lb:hover {
             border: 1px solid #5f76e8;
             box-shadow: 0 8px 8px -4px #5f76e8;
+        }
+
+        .select2-container--default .select2-selection--single {
+            background-color: unset;
+            padding: 6px 12px;
+        }
+
+        .select2-container .select2-selection--single {
+            height: unset;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 37px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: unset;
+        }
+
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #e9ecef;
+        }
+
+        .is-invalid .select2-selection,
+        .needs-validation~span>.select2-dropdown {
+            border-color: var(--bs-danger) !important;
         }
     </style>
     <!-- ============================================================== -->
@@ -76,7 +103,7 @@
                                 <h4 class="card-title mb-0">Data Menu</h4>
                                 <small>data menu primary</small>
                             </div>
-                            <a href="javascript:void(0)" class="btn btn-primary" data-bs-toggle="modal"
+                            <a href="javascript:void(0)" class="btn btn-primary add-menu" data-bs-toggle="modal"
                                 data-bs-target="#menuModal">Create Menu</a>
                         </div>
                         <div class="col-md-12" id="show-menu">
@@ -126,16 +153,20 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" name="param-menu" hidden>
+                    <input type="text" name="param-menu" id="param-menu" hidden>
                     <div class="form-group mb-3">
                         <label class="form-label" for="menu-group">Select Group <small class="text-danger">*</small></label>
                         <select name="menu-group" id="menu-group" class="form-control">
                         </select>
+                        <div id="invalid-menu-group" class="invalid-feedback">
+                        </div>
                     </div>
                     <div class="form-group mb-3">
                         <label class="form-label" for="name-menu">Name Menu <small class="text-danger">*</small></label>
                         <input class="form-control" type="text" id="name-menu" name="name-menu" required=""
                             placeholder="My Menu">
+                        <div id="invalid-name-menu" class="invalid-feedback">
+                        </div>
                     </div>
                     <div class="form-group mb-3">
                         <label class="form-label" for="type-menu">Type Menu <small class="text-danger">*</small></label>
@@ -144,12 +175,16 @@
                             <option value="dropdown">Parent Menu</option>
                             <option value="singgle">Child Menu</option>
                         </select>
+                        <div id="invalid-type-menu" class="invalid-feedback">
+                        </div>
                     </div>
                     <div class="form-group mb-3" id="parent" style="display: none">
                         <label class="form-label" for="parent-menu">Parent Menu</label>
                         <select name="parent-menu" id="parent-menu" class="form-control">
                             <option value="">--Select Menu--</option>
                         </select>
+                        <div id="invalid-parent-menu" class="invalid-feedback">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -177,6 +212,18 @@
                         </div>
 
                         <input type="text" name="param_group" hidden>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="divisi">Division <small
+                                class="text-danger">(mandatory)</small></label>
+                        <select name="divisi" id="divisi" class="form-control">
+                            <option value="">--Select Division--</option>
+                            @foreach ($divsi as $d)
+                                <option value="{{ $d->id }}">{{ $d->name }}</option>
+                            @endforeach
+                        </select>
+                        <div id="invalid-divisi" class="invalid-feedback">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -278,8 +325,19 @@
     <script src="../assets/extra-libs/datatables.net/js/jquery.dataTables.min.js"></script>
     <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
     <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
+    <script src="{{ asset('assets/select2/js/select2.js') }}"></script>
     <script>
         $(function() {
+            $('#divisi').select2({
+                width: '100%',
+                dropdownParent: $("#menuGroup"),
+            })
+
+            $('#menu-group').select2({
+                width: '100%',
+                dropdownParent: $("#menuModal"),
+            })
+
             var i = 1;
             var table = $('.tb-page').DataTable({
                 processing: true,
@@ -288,8 +346,8 @@
                 autoWidth: false,
                 ajax: "{{ route('pagemenu.datatables') }}",
                 columns: [{
-                        data: 'rownum',
-                        name: 'rownum',
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
                         orderable: false,
                         searchable: false,
                         width: "5%"
@@ -399,11 +457,7 @@
                     'setting page menu', '{{ route('dataMenu') }}?data=setting-page-menu');
             }
 
-            $('label[click]').on('click', function() {
-                $('label[click]').removeClass('border-blue')
-                $(this).addClass('border-blue')
-            })
-
+            // fungsu untuk group menu
             $('.create-group').on('click', function() {
                 $('input[name="name_group"]').val('')
                 $('input[name="param_group"]').val('')
@@ -416,6 +470,7 @@
                     data: {
                         _token: "{{ csrf_token() }}",
                         group: $('input[name="name_group"]').val(),
+                        divisi: $('#divisi').find('option').filter(':selected').val(),
                         param: $('input[name="param_group"]').val()
                     },
                     dataType: "json",
@@ -427,6 +482,14 @@
                             } else {
                                 $('input[name="name_group"]').removeClass('is-invalid')
                                 $('#invalid-group').html('')
+                            }
+
+                            if (response.error.divisi) {
+                                $("#divisi + span").addClass("is-invalid");
+                                $('#invalid-divisi').html(response.error.divisi[0])
+                            } else {
+                                $("#divisi + span").removeClass("is-invalid");
+                                $('#invalid-divisi').html('')
                             }
                         } else {
                             Swal.fire({
@@ -468,6 +531,7 @@
                             $('#menuGroup').modal('show')
                             $('input[name="name_group"]').val(response.success.name)
                             $('input[name="param_group"]').val(response.success.id)
+                            $('#divisi').val(response.success.id_divisi).trigger('change')
                             return false
                         }
                         Swal.fire(
@@ -518,9 +582,11 @@
                                     })
 
                                     getGroup()
+                                    getAllMenu()
                                     sidebarShow()
                                     return false
                                 }
+
                                 Swal.fire(
                                     'The Internet?',
                                     response.error,
@@ -540,6 +606,7 @@
                 })
             })
 
+            // fungsi untuk menu
             $('#menu-group').on('change', function() {
                 $.ajax({
                     url: "{{ route('dataMenu.getParentMenu') }}",
@@ -562,12 +629,22 @@
             })
 
             $('#type-menu').on('change', function() {
-                if ($('select[name=type-menu] option').filter(':selected').val() != 'dropdown') {
+                if ($('select[name=type-menu] option').filter(':selected').val() == 'singgle') {
                     $('#parent').show()
+                } else if ($('select[name=type-menu] option').filter(':selected').val() == 'dropdown') {
+                    $('#parent').hide()
+                    $('#parent-menu').prop('selectedIndex', 0);
                 } else {
                     $('#parent').hide()
                     $('#parent-menu').prop('selectedIndex', 0);
                 }
+            })
+
+            $('.add-menu').click(function() {
+                $('#menu-group').val('').trigger('change')
+                $('#type-menu').val('').trigger('change')
+                $('#name-menu').val('')
+                $('#param-menu').val('')
             })
 
             $('.save-menu').on('click', function() {
@@ -636,6 +713,38 @@
                             getSinggleMenu()
                             sidebarShow()
                         } else {
+                            if (response.error.id_group) {
+                                $('#menu-group').addClass('is-invalid')
+                                $('#invalid-menu-group').html(response.error.id_group)
+                            } else {
+                                $('#menu-group').removeClass('is-invalid')
+                                $('#invalid-menu-group').html('')
+                            }
+
+                            if (response.error.name) {
+                                $('#name-menu').addClass('is-invalid')
+                                $('#invalid-name-menu').html(response.error.name)
+                            } else {
+                                $('#name-menu').removeClass('is-invalid')
+                                $('#invalid-name-menu').html('')
+                            }
+
+                            if (response.error.type) {
+                                $('#type-menu').addClass('is-invalid')
+                                $('#invalid-type-menu').html(response.error.type)
+                            } else {
+                                $('#type-menu').removeClass('is-invalid')
+                                $('#invalid-type-menu').html('')
+                            }
+
+                            if (response.error.parent) {
+                                $('#parent-menu').addClass('is-invalid')
+                                $('#invalid-parent-menu').html(response.error.parent)
+                            } else {
+                                $('#parent-menu').removeClass('is-invalid')
+                                $('#invalid-parent-menu').html('')
+                            }
+
                             if (response.error.msg) {
                                 Swal.fire(
                                     'Ups?',
@@ -648,6 +757,79 @@
                 })
             })
 
+            $(document).on('click', '.edit-parent', function() {
+                $.ajax({
+                    url: "{{ route('dataMenu.editMenu') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        param: $(this).attr('data-param')
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.success) {
+                            $('#menuModal').modal('show')
+                            if (response.success.type != 'dropdown') {
+                                $('#parent').show()
+                            } else {
+                                $('#parent').hide()
+                                $('#parent-menu').prop('selectedIndex', 0);
+                            }
+
+                            $('#param-menu').val(response.success.id)
+                            $('#menu-group').val(response.success.id_divisi).trigger('change')
+                            $('#name-menu').val(response.success.name)
+                            $('#type-menu').val(response.success.type).trigger('change')
+                        }
+                    }
+                })
+            })
+
+            $(document).on('click', '.delete-parent', function() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('dataMenu.deleteMenu') }}",
+                            type: "post",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                param: $(this).attr('data-param')
+                            },
+                            dataType: "json",
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: response.success,
+                                        showConfirmButton: false,
+                                        toast: true,
+                                        timer: 1500
+                                    })
+
+                                    getAllMenu()
+                                } else {
+                                    Swal.fire(
+                                        'Ups?',
+                                        response.error,
+                                        'warning'
+                                    )
+                                }
+                            }
+                        })
+                    }
+                })
+            })
+
+            // fungsi untuk page
             $('#parent_menu').change(function() {
                 $.ajax({
                     url: "{{ route('dataMenu.pageParentMenu') }}",
@@ -789,7 +971,13 @@
                 })
             })
 
+            $('label[click]').on('click', function() {
+                $('label[click]').removeClass('border-blue')
+                $(this).addClass('border-blue')
+            })
+
             function getGroup() {
+                let divisi_name
                 $.ajax({
                     url: "{{ route('dataMenu.getGroupAll') }}",
                     type: "get",
@@ -797,25 +985,13 @@
                     success: function(response) {
                         if (response.count_group < 1) {
                             $('#html-group').html(
-                                '<div class="h2 text-center p-4" style="background:#f1f1f1">Please create a menu group first</div>'
+                                '<div class="h3 text-center p-4" style="background:#f1f1f1">No data available in grup menu</div>'
                             )
                         } else {
                             $('#html-group').html('')
+                            $('#html-group').html(response.html)
                             $('#menu-group').html('<option value="">--Select Group--</option>')
-                            for (let index = 0; index < response.data.length; index++) {
-                                $('#html-group').append(`
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                           <strong>${response.data[index].name}</strong>
-                            <span>
-                                <a href="javascript:void(0)" data-param=${response.data[index].id} class="badge bg-warning badge-pill edit-group">edit</a>
-                                <a href="javascript:void(0)" data-param=${response.data[index].id} class="badge bg-danger badge-pill del-group">delete</a>
-                            </span>
-                        </li>`)
-
-                                $('#menu-group').append(
-                                    `<option value="${response.data[index].id}">${response.data[index].name}</option>`
-                                )
-                            }
+                            $('#menu-group').append(response.option)
                         }
                     },
                     error: function(jqXHR, exception) {
@@ -836,12 +1012,12 @@
                     success: function(response) {
                         if (response.count_group < 1) {
                             $('#show-menu').html(
-                                '<div class="h2 text-center p-4" style="background:#f1f1f1">Please create a menu group first</div>'
+                                '<div class="h3 text-center p-4" style="background:#f1f1f1">No data available in menu</div>'
                             )
                         } else {
-                            if (response.count_menu < 1) {
+                            if (response.count_menu < 0) {
                                 $('#show-menu').html(
-                                    '<div class="h2 text-center p-4" style="background:#f1f1f1">Please create a menu</div>'
+                                    '<div class="h3 text-center p-4" style="background:#f1f1f1">No data available in menu</div>'
                                 )
                             } else {
                                 $('#show-menu').html(response.html)

@@ -44,6 +44,15 @@
         .font-700 {
             font-weight: 700;
         }
+
+        .divisi {
+            border-radius: 60px 60px 0px 60px;
+            color: #fff !important;
+            background: linear-gradient(to right, #27429f, #68bde1);
+            box-shadow: 0 7px 12px 0 rgba(95, 118, 232, 0.21);
+            opacity: 1;
+            padding: 5px 23px;
+        }
     </style>
     <!-- Preloader - style you can find in spinners.css -->
     <div class="preloader">

@@ -10,6 +10,7 @@ class MemoTemplate extends Controller
 {
     public function index()
     {
+        \LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
         return view('pages/memoTemplate/index');
     }
 

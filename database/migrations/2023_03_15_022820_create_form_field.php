@@ -15,8 +15,9 @@ class CreateFormField extends Migration
     {
         Schema::create('form_field', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_form_layout');
-            $table->integer('id_html_form')->nullable();
+            $table->bigInteger('id_form_layout');
+            $table->bigInteger('id_html_form')->nullable();
+            $table->string('original_name', 255); //<input type name>
             $table->string('field_name', 255); //<input type name>
             $table->string('type', 255);
             $table->timestamps();

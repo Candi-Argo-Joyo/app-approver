@@ -21,4 +21,212 @@
     <script src="../assets/extra-libs/datatables.net/js/jquery.dataTables.min.js"></script>
     <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
     <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
+    @if ($menu->page == 'Entry Page')
+        <script>
+            $(function() {
+                var table = $('.tb-entry').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    scrollX: true,
+                    autoWidth: false,
+                    ajax: {
+                        url: "{{ route('entrypage.datatables') }}",
+                        data: {
+                            id_html_form: '{{ $menu->id_html_form }}',
+                            menu: '{{ $menu->slug }}',
+                        },
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false,
+                            width: "5%"
+                        },
+                        {
+                            data: 'form_name',
+                            name: 'form_name',
+                            width: "30%"
+                        },
+                        {
+                            data: 'user_name',
+                            name: 'user_name',
+                            width: "30%"
+                        },
+                        {
+                            data: 'created_at',
+                            name: 'created_at',
+                            width: "25%"
+                        },
+                        {
+                            data: 'status',
+                            name: 'status',
+                            width: "5%"
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false,
+                            width: "5%"
+                        },
+                    ]
+                });
+
+                $(document).on('click', '.preview', function() {
+                    let param = $(this).attr('data-param')
+                })
+
+                $(document).on('click', '.delete', function() {
+                    let param = $(this).attr('data-param')
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: "{{ route('pages.delete') }}",
+                                type: "post",
+                                data: {
+                                    _token: "{{ csrf_token() }}",
+                                    param: param
+                                },
+                                dataType: "json",
+                                success: function(response) {
+                                    if (response.success) {
+                                        Swal.fire({
+                                            position: 'top-end',
+                                            icon: 'success',
+                                            title: response.success,
+                                            showConfirmButton: false,
+                                            toast: true,
+                                            timer: 1500
+                                        })
+                                        table.ajax.reload()
+                                    } else {
+                                        Swal.fire(
+                                            'Ups!',
+                                            response.error.msg,
+                                            'warning'
+                                        )
+                                    }
+                                }
+                            })
+                        }
+                    })
+                })
+            });
+        </script>
+    @endif
+    @if ($menu->page == 'Approver')
+        <script>
+            var table = $('.tb-approval').DataTable({
+                processing: true,
+                serverSide: true,
+                scrollX: true,
+                autoWidth: false,
+                ajax: {
+                    url: "{{ route('approvalpage.datatables') }}",
+                    data: {
+                        id_html_form: '{{ $menu->id_html_form }}',
+                        menu: '{{ $menu->slug }}',
+                    },
+                },
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false,
+                        width: "5%"
+                    },
+                    {
+                        data: 'form_name',
+                        name: 'form_name',
+                        width: "30%"
+                    },
+                    {
+                        data: 'user_name',
+                        name: 'user_name',
+                        width: "30%"
+                    },
+                    {
+                        data: 'created_at',
+                        name: 'created_at',
+                        width: "25%"
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        width: "5%"
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        width: "5%"
+                    },
+                ]
+            });
+        </script>
+    @endif
+    @if ($menu->page == 'Report')
+        <script>
+            $(function() {
+                var table = $('.tb-data').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    scrollX: true,
+                    autoWidth: false,
+                    ajax: {
+                        url: "{{ route('datapage.datatables') }}",
+                        data: {
+                            id_html_form: '{{ $menu->id_html_form }}',
+                            menu: '{{ $menu->slug }}',
+                        },
+                    },
+                    columns: [{
+                            data: 'DT_RowIndex',
+                            name: 'DT_RowIndex',
+                            orderable: false,
+                            searchable: false,
+                            width: "5%"
+                        },
+                        {
+                            data: 'form_name',
+                            name: 'form_name',
+                            width: "30%"
+                        },
+                        {
+                            data: 'user_name',
+                            name: 'user_name',
+                            width: "30%"
+                        },
+                        {
+                            data: 'created_at',
+                            name: 'created_at',
+                            width: "25%"
+                        },
+                        {
+                            data: 'status',
+                            name: 'status',
+                            width: "5%"
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false,
+                            width: "5%"
+                        },
+                    ]
+                });
+            })
+        </script>
+    @endif
 @endsection

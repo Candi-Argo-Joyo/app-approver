@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FormBuilder as HelpersFormBuilder;
+use App\Helpers\LogActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class FormBuilder extends Controller
 {
     public function index()
     {
+        LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
         $data = [
             'forms' => DB::table('html_form')->orderBy('id', 'desc')->get()
         ];
@@ -18,11 +22,21 @@ class FormBuilder extends Controller
 
     public function add(Request $request)
     {
+        LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
+
+        $html = isset($request->form) ? DB::table('html_form')->where('id', $request->form)->first() : DB::table('html_form')->where('status', 'draft')->first();
+
         $data = [
             'selected' => 'form_builder',
-            'html' => isset($request->form) ? DB::table('html_form')->where('id', $request->form)->first() : DB::table('html_form')->where('status', 'draft')->first(),
-            'page' => DB::table('menu')->where('parent', 0)->where('status', 'active')->get(),
+            'html' =>  $html,
+            'page' =>  HelpersFormBuilder::dataAdd($request)['page'],
+            'selected_page' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['selected_page'] : '',
+            'report' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['selected_report'] : '',
+            'user' => isset($request->form) ? DB::table('users')->where('role', 'manager')->where('is_mapping', 'true')->get() : '',
+            'approver' => isset($request->form) ? DB::table('menu')->where('id_html_form', $request->form)->where('page', 'Approver')->get() : '',
+            'selected_approver' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['selected_approver'] : ''
         ];
+
         return view('pages/formbuilder/addform', $data);
     }
 
@@ -68,6 +82,7 @@ class FormBuilder extends Controller
                         </div>
                     </div>';
 
+            LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
             $msg = [
                 'success' => [
                     'data' => $html,
@@ -87,12 +102,162 @@ class FormBuilder extends Controller
 
     public function updateFormHtml(Request $request)
     {
+        // var_dump($request);
+        // exit;
         if (isset($request->html_preview)) {
             $prev = $request->html_preview;
             $html_preview = '';
             for ($i = 0; $i < count($request->html_preview); $i++) {
                 $html_preview .= $prev[$i];
             }
+
+            // untuk mengecek apakah ada yang sama dengan value
+            $approver_name = $request->approver_name;
+            $approver_user = $request->approver_user;
+            $page_approver = $request->page_approver;
+            $val_approver_name = '';
+            $val_approver_user = '';
+            $val_page_approver = '';
+            $val_page_approver_error = [
+                'status_error' => 'false',
+                'page' => '',
+                'report' => '',
+                'name_approver' => [],
+                'user_approver' => [],
+                'page_approver' => [],
+            ];
+
+            if ($request->set_page == '') {
+                $val_page_approver_error['page'] = 'Entry page cannot be empty';
+                $val_page_approver_error['status_error'] = 'true';
+            }
+
+            if ($request->report_page == '') {
+                $val_page_approver_error['report'] = 'Report page cannot be empty';
+                $val_page_approver_error['status_error'] = 'true';
+            }
+
+            // mengecek value nama approver
+            for ($i = 0; $i < count($request->approver_name); $i++) {
+                if ($approver_name[$i] == '') {
+                    array_push($val_page_approver_error['name_approver'], ['value_empty' => 'Name approver cannot be empty']);
+                    $val_page_approver_error['status_error'] = 'true';
+                } else {
+                    if ($val_approver_name == $approver_name[$i] && $approver_name[$i] != '') {
+                        array_push($val_page_approver_error['name_approver'], ['same_value' => 'Name approver cannot be the same']);
+                        $val_page_approver_error['status_error'] = 'true';
+                    }
+                }
+
+                if ($approver_name[$i] != '') {
+                    $val_approver_name = $approver_name[$i];
+                }
+            }
+
+            // mengecek value user approver
+            for ($i = 0; $i < count($request->approver_user); $i++) {
+                if ($approver_user[$i] == '') {
+                    array_push($val_page_approver_error['user_approver'], ['value_empty' => 'User approver cannot be empty']);
+                    $val_page_approver_error['status_error'] = 'true';
+                } else {
+                    if ($val_approver_user == $approver_user[$i] && $approver_user[$i] != '') {
+                        array_push($val_page_approver_error['user_approver'], ['same_value' => 'User approver cannot be the same']);
+                        $val_page_approver_error['status_error'] = 'true';
+                    }
+                }
+
+                if ($approver_user[$i] != '') {
+                    $val_approver_user = $approver_user[$i];
+                }
+            }
+
+            // mengecek value page approver
+            for ($i = 0; $i < count($request->page_approver); $i++) {
+                if ($page_approver[$i] == '') {
+                    array_push($val_page_approver_error['page_approver'], ['value_empty' => 'Page approver cannot be empty']);
+                    $val_page_approver_error['status_error'] = 'true';
+                } else {
+                    if ($val_page_approver == $page_approver[$i] && $page_approver[$i] != '') {
+                        array_push($val_page_approver_error['page_approver'], ['same_value' => 'Page approver cannot be the same']);
+                        $val_page_approver_error['status_error'] = 'true';
+                    }
+                }
+
+                if ($page_approver[$i] != '') {
+                    $val_page_approver = $page_approver[$i];
+                }
+            }
+
+            if ($val_page_approver_error['status_error'] == 'true') {
+                return json_encode([
+                    'error' => $val_page_approver_error
+                ]);
+            }
+
+            DB::table('menu')->where('id', $request->set_page)->update([
+                'id_html_form' => $request->param_html,
+                'is_use' => 'yes'
+            ]);
+
+            DB::table('menu')->where('id', $request->report_page)->update([
+                'id_html_form' => $request->param_html,
+                'is_use' => 'yes'
+            ]);
+
+            if (isset($request->id_approver)) {
+                $id_approver = $request->id_approver;
+                for ($i = 0; $i < count($request->id_approver); $i++) {
+                    DB::table('approver_for_form')->where('id', $id_approver[$i])->delete();
+                }
+
+                for ($i = 0; $i < count($request->page_approver); $i++) {
+                    DB::table('menu')->where('id', $page_approver[$i])->update([
+                        'id_html_form' => $request->param_html,
+                        'id_user_approver' => $approver_user[$i],
+                        'is_use' => 'yes'
+                    ]);
+
+                    DB::table('approver_for_form')->insert([
+                        'id_html_form' => $request->param_html,
+                        'id_user_approver' => $approver_user[$i],
+                        'id_menu' => $page_approver[$i],
+                        'name' => $approver_name[$i],
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+            } else {
+                for ($i = 0; $i < count($request->page_approver); $i++) {
+                    DB::table('menu')->where('id', $page_approver[$i])->update([
+                        'id_html_form' => $request->param_html,
+                        'id_user_approver' => $approver_user[$i],
+                        'is_use' => 'yes'
+                    ]);
+
+                    DB::table('approver_for_form')->insert([
+                        'id_html_form' => $request->param_html,
+                        'id_user_approver' => $approver_user[$i],
+                        'id_menu' => $page_approver[$i],
+                        'name' => $approver_name[$i],
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+            }
+
+            if (isset($request->delete_approver)) {
+                $id_delete_approver = explode(',', $request->delete_approver);
+                for ($i = 0; $i < count($id_delete_approver); $i++) {
+                    $dataMenu = DB::table('approver_for_form')->where('id', $id_delete_approver[$i])->first();
+                    DB::table('menu')->where('id', $dataMenu->id_menu)->update([
+                        'id_html_form' => NULL,
+                        'id_user_approver' => NULL,
+                        'is_use' => 'no'
+                    ]);
+
+                    DB::table('approver_for_form')->where('id', $id_delete_approver[$i])->delete();
+                }
+            }
+
+            LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
 
             $data = [
                 'form_name' => $request->form_name,
@@ -114,9 +279,18 @@ class FormBuilder extends Controller
     {
         $validate = DB::table('html_form')->where('id', $request->param)->first();
         if ($validate) {
+            LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
+            DB::table('menu')->where('id_html_form', $request->param)->update([
+                'id_html_form' => NULL,
+                'id_user_approver' => NULL,
+                'status' => 'non-active',
+                'is_use' => 'no'
+            ]);
+
             DB::table('html_form')->where('id', $request->param)->delete();
             DB::table('form_layout')->where('id_html_form', $request->param)->delete();
             DB::table('form_field')->where('id_html_form', $request->param)->delete();
+            DB::table('approver_for_form')->where('id_html_form', $request->param)->delete();
         }
     }
 
@@ -302,6 +476,7 @@ class FormBuilder extends Controller
                     'id_form_layout' => $request->id_layout,
                     'id_html_form' => $request->id_html,
                     'field_name' => 'title ' . $urutanField,
+                    'original_name' => 'title ' . $urutanField,
                     'type' => 'title',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
@@ -311,7 +486,7 @@ class FormBuilder extends Controller
                                 <input data-label-input id-field="' . $idField . '" has-change="false" data-name="label-title-field-' . $urutanField . '" data-label-title data-title="true"
                                     type="text" value="Your title here ' . $urutanField . '" class="no-border w-100 input-title" data-type="title"
                                     id="label-title-field-' . $urutanField . '" hidden>
-                                <label data-field-label has-change="false" data-target="label-title-field-' . $urutanField . '" class="h4">Your title here ' . $urutanField . '</label>
+                                <label data-field-label has-change="false" data-target="label-title-field-' . $urutanField . '" class="h5">Your title here ' . $urutanField . '</label>
                             </div>
                             <div>
                                 <div class="d-flex gap-2 mb-2" data-action>
@@ -332,6 +507,7 @@ class FormBuilder extends Controller
                     'id_form_layout' => $request->id_layout,
                     'id_html_form' => $request->id_html,
                     'field_name' => 'text-field-' . $urutanField,
+                    'original_name' => 'text field ' . $urutanField,
                     'type' => 'text',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
@@ -347,10 +523,39 @@ class FormBuilder extends Controller
                             </div>
                             <div class="row justify-items-center">
                                 <div class="col-sm-3 col-form-label">
-                                    <input data-label-input id-field="' . $idField . '" data-label-text type="text" has-change="false" value="Text Field ' . $urutanField . '" data-target-input="#text-field-' . $urutanField . '" class="no-border w-100" id="label-text-field-' . $urutanField . '" readonly="true">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-text type="text" has-change="false" value="Text Field ' . $urutanField . '" data-target-input="#text-field-' . $urutanField . '" class="no-border w-100" id="label-text-field-' . $urutanField . '" readonly="true">
                                 </div>
                                 <div class="col-sm-9">
                                     <input data-filed data-text class="form-control input-text" has-change="false" placeholder="Input Text Here..." type="text" name="text-field-' . $urutanField . '" id="text-field-' . $urutanField . '">
+                                </div>
+                            </div> 
+                        </div>';
+                break;
+            case 'number':
+                $idField = DB::table('form_field')->insertGetId([
+                    'id_form_layout' => $request->id_layout,
+                    'id_html_form' => $request->id_html,
+                    'field_name' => 'number-field-' . $urutanField,
+                    'original_name' => 'number field ' . $urutanField,
+                    'type' => 'number',
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray mb-3" data-field-number id="number-' . $urutanField . '" data-css>
+                            <div class="d-flex flex-row justify-content-end gap-2 mb-2" data-action>
+                                <a href="javascript:void(0)" class="badge bg-warning" x-edit data-edit-number data-name="label-number-field-' . $urutanField . '">
+                                    edit
+                                </a>
+                                <a href="javascript:void(0)" id-field="' . $idField . '" class="badge bg-danger del-fileld" data-delete-number data-target-delete="#number-' . $urutanField . '" data-type="number">
+                                    delete
+                                </a>
+                            </div>
+                            <div class="row justify-items-center">
+                                <div class="col-sm-3 col-form-label">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-number type="text" has-change="false" value="number Field ' . $urutanField . '" data-target-input="#number-field-' . $urutanField . '" class="no-border w-100" id="label-number-field-' . $urutanField . '" readonly="true">
+                                </div>
+                                <div class="col-sm-9">
+                                    <input data-filed data-number class="form-control input-number" has-change="false" placeholder="Input number Here..." type="number" name="number-field-' . $urutanField . '" id="number-field-' . $urutanField . '">
                                 </div>
                             </div> 
                         </div>';
@@ -360,6 +565,7 @@ class FormBuilder extends Controller
                     'id_form_layout' => $request->id_layout,
                     'id_html_form' => $request->id_html,
                     'field_name' => 'date-field-' . $urutanField,
+                    'original_name' => 'date field ' . $urutanField,
                     'type' => 'date',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
@@ -375,7 +581,7 @@ class FormBuilder extends Controller
                             </div>
                             <div class="row justify-items-center">
                                 <div class="col-sm-3 col-form-label">
-                                    <input data-label-input id-field="' . $idField . '" data-label-date type="text" has-change="false" value="Date Field ' . $urutanField . '" data-target-input="#date-field-' . $urutanField . '" class="no-border w-100" id="label-date-field-' . $urutanField . '" readonly="true">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-date type="text" has-change="false" value="Date Field ' . $urutanField . '" data-target-input="#date-field-' . $urutanField . '" class="no-border w-100" id="label-date-field-' . $urutanField . '" readonly="true">
                                 </div>
                                 <div class="col-sm-9">
                                     <input data-filed data-date class="form-control input-date" type="date" has-change="false" name="date-field-' . $urutanField . '" id="date-field-' . $urutanField . '">
@@ -388,6 +594,7 @@ class FormBuilder extends Controller
                     'id_form_layout' => $request->id_layout,
                     'id_html_form' => $request->id_html,
                     'field_name' => 'file-field-' . $urutanField,
+                    'original_name' => 'file field ' . $urutanField,
                     'type' => 'file',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
@@ -403,7 +610,7 @@ class FormBuilder extends Controller
                             </div>           
                             <div class="row justify-items-center">
                                 <div class="col-sm-3 col-form-label">
-                                    <input data-label-input id-field="' . $idField . '" data-label-file type="text" has-change="false" value="File Field ' . $urutanField . '" data-target-input="#file-field-' . $urutanField . '" class="no-border w-100" id="label-file-field-' . $urutanField . '" readonly="true">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-file type="text" has-change="false" value="File Field ' . $urutanField . '" data-target-input="#file-field-' . $urutanField . '" class="no-border w-100" id="label-file-field-' . $urutanField . '" readonly="true">
                                 </div>
                                 <div class="col-sm-9">
                                     <input data-filed data-file class="form-control input-file" type="file" has-change="false" name="file-field-' . $urutanField . '" id="file-field-' . $urutanField . '">
@@ -416,6 +623,7 @@ class FormBuilder extends Controller
                     'id_form_layout' => $request->id_layout,
                     'id_html_form' => $request->id_html,
                     'field_name' => 'textarea-field-' . $urutanField,
+                    'original_name' => 'textarea field ' . $urutanField,
                     'type' => 'textarea',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
@@ -431,7 +639,7 @@ class FormBuilder extends Controller
                             </div>           
                             <div class="row justify-items-center">
                                <div class="col-sm-3 col-form-label">
-                                   <input data-label-input id-field="' . $idField . '" data-label-textarea type="text" has-change="false" value="Textarea Field ' . $urutanField . '" data-target-input="#textarea-field-' . $urutanField . '" class="no-border w-100" id="label-textarea-field-' . $urutanField . '" readonly="true">
+                                   <input name="label[]" data-label-input id-field="' . $idField . '" data-label-textarea type="text" has-change="false" value="Textarea Field ' . $urutanField . '" data-target-input="#textarea-field-' . $urutanField . '" class="no-border w-100" id="label-textarea-field-' . $urutanField . '" readonly="true">
                                </div>
                                <div class="col-sm-9">
                                     <textarea data-filed data-textarea class="form-control input-textarea" has-change="false" name="textarea-field-' . $urutanField . '" id="textarea-field-' . $urutanField . '"></textarea>
@@ -444,6 +652,7 @@ class FormBuilder extends Controller
                     'id_form_layout' => $request->id_layout,
                     'id_html_form' => $request->id_html,
                     'field_name' => 'select-option-field-' . $urutanField,
+                    'original_name' => 'select option field ' . $urutanField,
                     'type' => 'select-option',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
@@ -474,7 +683,7 @@ class FormBuilder extends Controller
                             </div>           
                             <div class="row justify-items-center">
                                <div class="col-sm-3 col-form-label">
-                                    <input data-label-input id-field="' . $idField . '" data-label-select type="text" has-change="false" value="Select Field ' . $urutanField . '" data-target-input="#select-option-field-' . $urutanField . '" class="no-border w-100" id="label-select-field-' . $urutanField . '" readonly="true">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-select type="text" has-change="false" value="Select Field ' . $urutanField . '" data-target-input="#select-option-field-' . $urutanField . '" class="no-border w-100" id="label-select-field-' . $urutanField . '" readonly="true">
                                </div>
                                <div class="col-sm-9">
                                     <select data-filed select-option class="form-control select-option" has-change="false" name="select-option-field-' . $urutanField . '" id="select-option-field-' . $urutanField . '">
@@ -489,6 +698,7 @@ class FormBuilder extends Controller
                     'id_form_layout' => $request->id_layout,
                     'id_html_form' => $request->id_html,
                     'field_name' => 'default-radio-buttons-' . $urutanField,
+                    'original_name' => 'default radio buttons ' . $urutanField,
                     'type' => 'radio-button',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
@@ -523,7 +733,7 @@ class FormBuilder extends Controller
                             </div>
                             <h5 class="card-title" has-change="false" data-is-label-radio data-label-radio="label-radio-field-' . $urutanField . '">Default Radio
                                 Buttons ' . $urutanField . '</h5>
-                            <input data-label-input id-field="' . $idField . '" data-label-radio has-change="false" type="text"
+                            <input name="label[]" data-label-input id-field="' . $idField . '" data-label-radio has-change="false" type="text"
                                 data-name="label-radio-field-' . $urutanField . '" id="label-radio-field-' . $urutanField . '" value="Default Radio Buttons ' . $urutanField . '"
                                 class="no-border radio-button" data-type="radio" hidden>
                             <div data-radio-append id="radio-append-' . $urutanField . '">
@@ -542,6 +752,7 @@ class FormBuilder extends Controller
                     'id_form_layout' => $request->id_layout,
                     'id_html_form' => $request->id_html,
                     'field_name' => 'checkbox-' . $urutanField,
+                    'original_name' => 'checkbox ' . $urutanField,
                     'type' => 'check-box',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
@@ -564,7 +775,7 @@ class FormBuilder extends Controller
                                         <input type="checkbox" data-checkbox-indicator has-change="false" data-id="label-checkbox-field-' . $urutanField . '"
                                             name="checkbox-' . $urutanField . '" value="i am unchecked Checkbox ' . $urutanField . '">
                                         <span class="ms-3" data-label-checkbox has-change="false" data-target="label-checkbox-field-' . $urutanField . '">i am unchecked Checkbox ' . $urutanField . '</span>
-                                        <input type="text" id="label-checkbox-field-' . $urutanField . '" data-label-input data-checkbox
+                                        <input name="label[]" type="text" id="label-checkbox-field-' . $urutanField . '" data-label-input data-checkbox
                                             data-type="checkbox" data-name="label-checkbox-field-' . $urutanField . '" has-change="false"
                                             value="i am unchecked Checkbox ' . $urutanField . '" class="no-border border-bottom w-100" hidden>
                                     </label>
@@ -713,6 +924,7 @@ class FormBuilder extends Controller
         if ($validasi) {
             DB::table('form_field')->where('id', $request->id)->update([
                 'field_name' => $request->name,
+                'original_name' => $request->original_name,
                 'updated_at' => date('Y-m-d H:i:s')
             ]);
 
@@ -735,40 +947,86 @@ class FormBuilder extends Controller
     }
 
     // area setting form
-    public function moreApprover()
+    public function moreApprover(Request $request)
     {
-        $approver = DB::table('users')->where('role', 'user')->where('is_mapping', 'true')->get();
-        $page = DB::table('menu')->where('status', 'active')->where('page', 'Approver')->whereNotIn('parent', ['0'])->whereNull('id_html_form')->get();
-        $html = '<tr>
-                    <td><input type="text" name="approver-name[]" class="form-control"></td>
-                     <td>
-                         <select name="user-approver[]" id="" class="form-control">
-                             <option value="">--Select Approver--</option>';
-        foreach ($approver as $a) {
-            $html .= '<option value="' . $a->id . '">' . $a->name . '</option>';
+        if (Auth::user()->role == 'administrator') {
+            $approver = DB::table('users')->where('role', 'manager')->where('id_divisi', $request->divisi)->where('is_mapping', 'true')->get();
+        } else {
+            $approver = DB::table('users')->where('role', 'manager')->where('id_divisi', Auth::user()->id_divisi)->where('is_mapping', 'true')->get();
         }
-        $html .= '</select>
+        // dd($approver);
+        // exit;
+
+        if (!$approver->isEmpty()) {
+            $page =  DB::table('menu')->where('parent', $request->parent)->where('page', 'Approver')->where('status', 'active')->whereNull('id_html_form')->get();
+
+            $html = '<tr>
+                    <td>
+                        <input type="text" name="approver-name[]" class="form-control">
+                        <div id="invalid-page-approver" class="invalid-feedback">
+                        </div>
+                    </td>
+                    <td>
+                        <select name="user-approver[]" id="" class="form-control">
+                            <option value="">--Select Approver--</option>';
+            foreach ($approver as $a) {
+                $html .= '<option value="' . $a->id . '">' . $a->name . '</option>';
+            }
+            $html .= '</select>
+                    <div id="invalid-page-approver" class="invalid-feedback">
+                    </div>
                      </td>
                      <td>
                          <select name="page-approver[]" id="" class="form-control">
                              <option value="">--Select Page Approver--</option>';
-        foreach ($page as $p) {
-            $html .= '<option value="' . $p->id . '">' . $p->name . '</option>';
-        }
-        $html .= '</select>
+            foreach ($page as $p) {
+                $html .= '<option value="' . $p->id . '">' . $p->name . '</option>';
+            }
+            $html .= '</select>
+                     <div id="invalid-page-approver" class="invalid-feedback">
+                     </div>
                      </td>
                      <td>
                          <a href="javascript:void(0)" class="btn btn-danger del-approver">-</a>
                      </td>
                  </tr>';
+            return response()->json(['data' => $html, 'report' => $page]);
+        }
 
-        return response()->json(['data' => $html]);
+        $divisi = DB::table('division')->where('id', $request->divisi)->first();
+        return response()->json(['error' => 'Manager with <strong style="color:red">' . $divisi->name . ' division</strong> not found']);
     }
 
     public function getpageApprover(Request $request)
     {
-        $page = DB::table('menu')->where('parent', $request->parent)->where('page', 'Approver')->whereNotIn('parent', ['0'])->whereNull('id_html_form')->get();
-        return response()->json(['data' => $page]);
+        if (isset($request->is_edit)) {
+            $base = DB::table('menu')->where('id_html_form', $request->is_edit)->where('parent', $request->parent)->where('page', 'Entry Page')->first();
+            if ($base) {
+                $page = DB::table('menu')->where('parent', $request->parent)->where('page', 'Approver')->get();
+                $report = DB::table('menu')->where('parent', $request->parent)->where('page', 'Report')->get();
+            } else {
+                $page = DB::table('menu')->where('parent', $request->parent)->where('page', 'Approver')->whereNull('id_html_form')->get();
+                $report = DB::table('menu')->where('parent', $request->parent)->where('page', 'Report')->whereNull('id_html_form')->get();
+            }
+        } else {
+            $page = DB::table('menu')->where('parent', $request->parent)->where('page', 'Approver')->whereNull('id_html_form')->get();
+            $report = DB::table('menu')->where('parent', $request->parent)->where('page', 'Report')->whereNull('id_html_form')->get();
+        }
+
+        if (!$report || !$page) {
+            return response()->json([
+                'error' => [
+                    'msg' => 'page not found',
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'success' => [
+                'data' => $page,
+                'report' => $report
+            ]
+        ]);
     }
 
     public function preview(Request $request)
@@ -779,5 +1037,55 @@ class FormBuilder extends Controller
         ];
 
         return view('pages/formbuilder/preview', $data);
+    }
+
+    public function settingGetfield(Request $request)
+    {
+        $validate_field = DB::table('form_field')->where('id_html_form', $request->param)->where('type', 'number')->get();
+        if ($validate_field) {
+            return response()->json([
+                'success' => [
+                    'field' => $validate_field,
+                    'approval' => DB::table('approver_for_form')->where('id_html_form', $request->param)->get(),
+                    'selected_field' => DB::table('approver_for_form')->whereNotNull('id_form_field')->where('id_html_form', $request->param)->first()
+                ]
+            ]);
+        }
+
+        return response()->json([
+            'error' => ['msg' => 'Field type number not found']
+        ]);
+    }
+
+    public function settingSaveApprover(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'field' => 'required',
+                'amount' => 'required',
+                'comparison' => 'required',
+                'approval' => 'required',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => $validator->errors()
+            ]);
+        }
+
+        DB::table('approver_for_form')->where('id', $request->approval)->update([
+            'id_form_field' => $request->field,
+            'rule' => 'true',
+            'field_condition' => $request->logic,
+            'condition' => $request->condition,
+            'amount' => $request->amount,
+            'comparison' => $request->comparison,
+        ]);
+
+        return response()->json([
+            'success' => 'Condition form successfully created'
+        ]);
     }
 }

@@ -1,11 +1,3 @@
-@extends('index')
-@section('title', 'Data Kredit | Aprover KDDI')
-@section('css')
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css">
-@endsection
-@section('content')
-    <!-- ============================================================== -->
     <div class="page-breadcrumb">
         <div class="row">
             <div class="col-7 align-self-center">
@@ -32,27 +24,19 @@
                     <div class="card-body">
                         <h4 class="card-title">List <?= $menu->name ?></h4>
                         <div class="table-responsive">
-                            <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
+                            <table class="table border table-striped table-bordered text-nowrap tb-data">
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Deaeler Name</th>
-                                        <th>Deaeler Address</th>
-                                        <th>Deaeler Code</th>
-                                        <th>Sales Name</th>
-                                        <th>No Hp</th>
-                                        <th>Customer Name</th>
-                                        <th>Customer Address</th>
-                                        <th>Merk / Jenis / Type</th>
-                                        <th>Total OTR</th>
-                                        <th>DP</th>
-                                        <th>Total Unit</th>
+                                        <th>Form Name</th>
+                                        <th>Created By</th>
+                                        <th>Created At</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
+                                    {{-- <tr>
                                         <td>1</td>
                                         <td>PT Batang Panjang</td>
                                         <td>Jl Seroa Jawa Tengah Kota Pekalongan</td>
@@ -72,7 +56,7 @@
                                             </a>
                                             <a href="{{ route('dataKredit.detail') }}" class="badge bg-success">Detail</a>
                                         </td>
-                                    </tr>
+                                    </tr> --}}
                                 </tbody>
                             </table>
                         </div>
@@ -82,10 +66,3 @@
         </div>
         <!-- End Top Leader Table -->
     </div>
-    <!--End Container fluid  -->
-@endsection
-@section('script')
-    <script src="../assets/extra-libs/datatables.net/js/jquery.dataTables.min.js"></script>
-    <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
-    <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
-@endsection

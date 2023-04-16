@@ -53,8 +53,9 @@
                                             <td>{{ $f->form_name }}</td>
                                             <td>{{ $f->status }}</td>
                                             <td style="width: 12px">
-                                                <a href="javascript:void(0)" class="btn btn-info" data-bs-toggle="modal"
-                                                    data-bs-target="#myModal">
+                                                <a href="javascript:void(0)" class="btn btn-info setting-form"
+                                                    data-bs-toggle="modal" data-bs-target="#myModal"
+                                                    data-form-id="{{ $f->id }}">
                                                     <i class="fas fa-cog"></i>
                                                 </a>
                                                 <a href="{{ route('formBuilder.preview') }}?form={{ $f->id }}"
@@ -84,57 +85,57 @@
     <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Add Condition Form</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="name">Select Field to Condition</label>
-                        <select name="" id="" class="form-control">
-                            <option value="">--Select Field--</option>
-                        </select>
+                <form action="" id="conditional-form">
+                    @csrf
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Add Condition Form</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="name">Condition</label>
-                        {{-- <div class="w-100">
-                            <a href="javascript:void(0)" class="btn btn-primary w-100">Add Condition</a>
-                        </div> --}}
-                        <div class="row mb-3">
-                            <div class="col-md-3">
-                                <input class="form-control" type="text" id="name" required=""
-                                    placeholder="Division Name" value="if" disabled>
+                    <div class="modal-body">
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="name">Select Field to Condition</label>
+                            <select name="field" id="field" class="form-control">
+                                <option value="">--Select Field--</option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="name">Condition</label>
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <input class="form-control" type="text" id="logic" name="logic"
+                                        placeholder="Division Name" value="if" readonly>
+                                </div>
+                                <div class="col-md-6 p-0">
+                                    <input class="form-control" type="text" id="amount" name="amount"
+                                        placeholder="Amount">
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="comparison" id="comparison" class="form-control text-center">
+                                        <option value="">--Comparison--</option>
+                                        <option value=">"> > </option>
+                                        <option value="<">
+                                            < </option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-md-6 p-0">
-                                <input class="form-control" type="text" id="name" required=""
-                                    placeholder="Amount">
-                            </div>
-                            <div class="col-md-3">
-                                <select name="" id="" class="form-control text-center">
-                                    <option value="">--Comparison--</option>
-                                    <option value=""> > </option>
-                                    <option value="">
-                                        < </option>
-                                </select>
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <input class="form-control" type="text" id="name" name="condition"
+                                        value="must pass" readonly>
+                                </div>
+                                <div class="col-md-9">
+                                    <select name="approval" id="approval" class="form-control">
+                                        <option value="">--Select Approval--</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-md-3">
-                                <input class="form-control" type="text" id="name" required=""
-                                    placeholder="Division Name" value="must pass" disabled>
-                            </div>
-                            <div class="col-md-9">
-                                <select name="" id="" class="form-control">
-                                    <option value="">--Select Approval--</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div>
@@ -162,5 +163,126 @@
                 },
             ],
         });
+
+        $(document).on('click', '.setting-form', function() {
+            let id = $(this).attr('data-form-id')
+            $.ajax({
+                url: "{{ route('formBuilder.settinggetfield') }}",
+                type: "post",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    param: id
+                },
+                dataType: "json",
+                success: function(response) {
+                    if (response.success) {
+                        $('#field').html('<option value="">--Select Field--</option>')
+                        for (let index = 0; index < response.success.field.length; index++) {
+                            var option = $('<option>', {
+                                text: response.success.field[index].field_name,
+                                value: response.success.field[index].id
+                            })
+
+                            $('#field').append(option)
+                            if (response.success.selected_field != null) {
+                                if (response.success.field[index].id == response.success.selected_field
+                                    .id_form_field) {
+                                    $(option).prop('selected', true)
+                                }
+                            }
+                        }
+
+                        $('#approval').html('<option value="">--Select Approval--</option>')
+                        for (let index = 0; index < response.success.approval.length; index++) {
+                            var option = $('<option>', {
+                                text: response.success.approval[index].name,
+                                value: response.success.approval[index].id
+                            })
+
+                            $('#approval').append(option)
+                            if (response.success.selected_field != null) {
+                                if (response.success.approval[index].id == response.success
+                                    .selected_field.id) {
+                                    $(option).prop('selected', true)
+                                }
+                            }
+                        }
+
+                        if (response.success.selected_field != null) {
+                            $('#amount').val(response.success.selected_field.amount)
+
+                            $('select[name="comparison"] option').each(function(e) {
+                                if ($(this).val() == response.success.selected_field
+                                    .comparison) {
+                                    $(this).prop('selected', true)
+                                }
+                            })
+                        }
+                    }
+                }
+            })
+        })
+
+        $('#conditional-form').on('submit', function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: "{{ route('formBuilder.settingsaveapprover') }}",
+                type: "post",
+                data: $(this).serialize(),
+                dataType: "json",
+                success: function(response) {
+                    $('span[err]').remove()
+
+                    if (response.error) {
+                        $('#field').removeClass('is-invalid')
+                        $('#amount').removeClass('is-invalid')
+                        $('#comparison').removeClass('is-invalid')
+                        $('#approval').removeClass('is-invalid')
+
+                        if (response.error.field) {
+                            $('#field').addClass('is-invalid')
+                            $('#field').parent().append(
+                                '<span err class="invalid-feedback">' + response.error.field +
+                                '</span>'
+                            )
+                        }
+
+                        if (response.error.amount) {
+                            $('#amount').addClass('is-invalid')
+                            $('#amount').parent().append(
+                                '<span err class="invalid-feedback">' + response.error.amount +
+                                '</span>')
+                        }
+
+                        if (response.error.comparison) {
+                            $('#comparison').addClass('is-invalid')
+                            $('#comparison').parent().append(
+                                '<span err class="invalid-feedback">' + response.error.comparison +
+                                '</span>'
+                            )
+                        }
+
+                        if (response.error.approval) {
+                            $('#approval').addClass('is-invalid')
+                            $('#approval').parent().append(
+                                '<span err class="invalid-feedback">' + response.error.approval +
+                                '</span>'
+                            )
+                        }
+                    } else {
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: response.success,
+                            showConfirmButton: false,
+                            toast: true,
+                            timer: 1500
+                        })
+                        $('#myModal').modal('hide')
+                    }
+                }
+            })
+        })
     </script>
 @endsection

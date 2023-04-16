@@ -15,7 +15,7 @@ class CreateOptionValue extends Migration
     {
         Schema::create('option_value', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_option_group');
+            $table->bigInteger('id_option_group');
             $table->string('value')->nullable();
             $table->string('placeholder')->default('False');
             $table->timestamps();

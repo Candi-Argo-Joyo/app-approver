@@ -15,7 +15,7 @@ class CreateRadioValue extends Migration
     {
         Schema::create('radio_value', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_radio_group');
+            $table->bigInteger('id_radio_group');
             $table->string('value')->nullable();
             $table->string('first')->default('False');
             $table->timestamps();

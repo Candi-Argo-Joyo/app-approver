@@ -15,7 +15,7 @@ class CreateFormLayout extends Migration
     {
         Schema::create('form_layout', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_html_form');
+            $table->bigInteger('id_html_form');
             $table->enum('jenis', ['column-1', 'column-2', 'column-3']);
             $table->timestamps();
         });

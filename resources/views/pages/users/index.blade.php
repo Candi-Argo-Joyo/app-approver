@@ -47,7 +47,7 @@
             </div>
             <div class="col-5 align-self-center">
                 <div class="customize-input float-end">
-                    <a href="javasctipt:void(0)" class="btn btn-primary" data-bs-toggle="modal"
+                    <a href="javasctipt:void(0)" class="btn btn-primary add" data-bs-toggle="modal"
                         data-bs-target="#myModal">Add User</a>
                 </div>
             </div>
@@ -63,31 +63,18 @@
                     <div class="card-body">
                         <h4 class="card-title">List Data Users</h4>
                         <div class="table-responsive">
-                            <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
+                            <table class="table border table-striped table-bordered text-nowrap tb-users">
                                 <thead>
                                     <tr>
                                         <th style="width: 15px">#</th>
                                         <th>Full Name</th>
                                         <th>User Name</th>
                                         <th>Email</th>
-                                        <th>Position</th>
-                                        <th>Level</th>
+                                        <th>Source</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Anton Wowo</td>
-                                        <td>anton_wowo</td>
-                                        <td>anton@mail.com</td>
-                                        <td>Manager</td>
-                                        <td>User</td>
-                                        <td>
-                                            <a href="#" class="badge bg-warning">Edit</a>
-                                            <a href="#" class="badge bg-danger">Delete</a>
-                                        </td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -101,50 +88,56 @@
     <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Form Dealer</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="name">Full Name</label>
-                        <input class="form-control" type="text" id="name" required=""
-                            placeholder="Michael Zenaty">
+                <form action="" id="form-user">
+                    @csrf
+                    <input type="text" name="param" id="param" hidden>
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Form Dealer</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="name">Username</label>
-                        <input class="form-control" type="text" id="name" required=""
-                            placeholder="michael_zenaty">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="password">Password</label>
-                        <div class="d-flex">
-                            <input style="border-radius: unset" class="form-control border-radius-left" type="password"
-                                id="password" value="kddi123" required>
-                            <div role="button" class="buton-eye border-radius-right show">
-                                <div style="padding-top: 1.1px;"><i class="fas fa-eye "></i></div>
+                    <div class="modal-body">
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="name">Full Name</label>
+                            <input class="form-control" type="text" id="name" name="name"
+                                placeholder="Michael Zenaty">
+                            <div id="invalid-name" class="invalid-feedback">
                             </div>
-                            <div role="button" class="buton-eye border-radius-right hidden" style="display:none;">
-                                <div style="padding-top: 1.1px;"><i class="fas fa-eye-slash"></i></div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="username">Username</label>
+                            <input class="form-control" type="text" id="username" name="username"
+                                placeholder="michael_zenaty">
+                            <div id="invalid-username" class="invalid-feedback">
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="password">Password</label>
+                            <div class="d-flex" id="err-pswd">
+                                <input style="border-radius: unset" id="password" class="form-control border-radius-left"
+                                    type="password" value="kddi123" name="password">
+                                <div role="button" class="buton-eye border-radius-right show">
+                                    <div style="padding-top: 1.1px;"><i class="fas fa-eye "></i></div>
+                                </div>
+                                <div role="button" class="buton-eye border-radius-right hidden" style="display:none;">
+                                    <div style="padding-top: 1.1px;"><i class="fas fa-eye-slash"></i></div>
+                                </div>
+                            </div>
+                            <div id="invalid-password" class="invalid-feedback">
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="email">Email</label>
+                            <input class="form-control" type="email" id="email" name="email"
+                                placeholder="michael@mail.com">
+                            <div id="invalid-email" class="invalid-feedback">
                             </div>
                         </div>
                     </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="name">Email</label>
-                        <input class="form-control" type="email" id="name" required=""
-                            placeholder="michael@mail.com">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
                     </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="name">Jabatan</label>
-                        <select name="" id="" class="form-control">
-                            <option value="">--Select Jabatan--</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
+                </form>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div>
@@ -154,16 +147,199 @@
     <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
     <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
     <script>
-        $('.show').mousedown(function() {
-            $(this).hide()
-            $('#password').attr('type', 'text')
-            $('.hidden').show()
-        })
+        $(function() {
+            $('.show').mousedown(function() {
+                $(this).hide()
+                $('#password').attr('type', 'text')
+                $('.hidden').show()
+            })
 
-        $('.hidden').mousedown(function() {
-            $(this).hide()
-            $('#password').attr('type', 'password')
-            $('.show').show()
+            $('.hidden').mousedown(function() {
+                $(this).hide()
+                $('#password').attr('type', 'password')
+                $('.show').show()
+            })
+
+            $('.add').click(function() {
+                $('#name').val('')
+                $('#username').val('')
+                $('#email').val('')
+                $('#password').val('kddi123')
+                $('#param').val('')
+            })
+
+            var table = $('.tb-users').DataTable({
+                processing: true,
+                serverSide: true,
+                scrollX: true,
+                autoWidth: false,
+                ajax: "{{ route('users.datatables') }}",
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false,
+                        width: "5%"
+                    },
+                    {
+                        data: 'name',
+                        name: 'name',
+                        width: "30%"
+                    },
+                    {
+                        data: 'username',
+                        name: 'username',
+                        width: "30%"
+                    },
+                    {
+                        data: 'email',
+                        name: 'email',
+                        width: "5%"
+                    },
+                    {
+                        data: 'source',
+                        name: 'source',
+                        width: "5%"
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        width: "5%"
+                    },
+                ]
+            });
+
+            $('#form-user').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{{ route('users.save') }}",
+                    type: "post",
+                    data: $(this).serialize(),
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.error) {
+                            if (response.error.name) {
+                                $('#name').addClass('is-invalid')
+                                $('#invalid-name').html(response.error.name)
+                            } else {
+                                $('#name').removeClass('is-invalid')
+                                $('#invalid-name').html('')
+                            }
+
+                            if (response.error.username) {
+                                $('#username').addClass('is-invalid')
+                                $('#invalid-username').html(response.error.username)
+                            } else {
+                                $('#username').removeClass('is-invalid')
+                                $('#invalid-username').html('')
+                            }
+
+                            if (response.error.password) {
+                                $('#err-pswd').addClass('is-invalid')
+                                $('#err-pswd').attr('style', 'border: 1px solid #ff4f70;')
+                                $('#invalid-password').html(response.error.password)
+                            } else {
+                                $('#err-pswd').removeClass('is-invalid')
+                                $('#err-pswd').removeAttr('style')
+                                $('#invalid-password').html('')
+                            }
+
+                            if (response.error.email) {
+                                $('#email').addClass('is-invalid')
+                                $('#invalid-email').html(response.error.email)
+                            } else {
+                                $('#email').removeClass('is-invalid')
+                                $('#invalid-email').html('')
+                            }
+                        } else {
+                            table.ajax.reload();
+                            $('#myModal').modal('hide')
+
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: response.success,
+                                showConfirmButton: false,
+                                toast: true,
+                                timer: 1500
+                            })
+                        }
+                    }
+                })
+            })
+
+            $(document).on('click', '.edit', function() {
+                $.ajax({
+                    url: "{{ route('users.edit') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        param: $(this).attr('data-param')
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.success) {
+                            $('#myModal').modal('show')
+                            $('#name').val(response.success.name)
+                            $('#username').val(response.success.username)
+                            $('#password').val('')
+                            $('#email').val(response.success.email)
+                            $('#param').val(response.success.id)
+                        } else {
+                            Swal.fire(
+                                'Ups?',
+                                response.error,
+                                'warning'
+                            )
+                        }
+                    }
+                })
+            })
+
+            $(document).on('click', '.delete', function() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('users.delete') }}",
+                            type: "post",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                param: $(this).attr('data-param')
+                            },
+                            dataType: "json",
+                            success: function(response) {
+                                if (response.success) {
+                                    table.ajax.reload();
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: response.success,
+                                        showConfirmButton: false,
+                                        toast: true,
+                                        timer: 1500
+                                    })
+                                } else {
+                                    Swal.fire(
+                                        'Ups?',
+                                        response.error,
+                                        'warning'
+                                    )
+                                }
+                            }
+                        })
+                    }
+                })
+            })
         })
     </script>
 @endsection

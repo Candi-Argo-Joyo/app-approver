@@ -21,7 +21,7 @@
             </div>
             <div class="col-5 align-self-center">
                 <div class="customize-input float-end">
-                    <a href="javasctipt:void(0)" class="btn btn-primary" data-bs-toggle="modal"
+                    <a href="javasctipt:void(0)" class="btn btn-primary add" data-bs-toggle="modal"
                         data-bs-target="#myModal">Add Division</a>
                 </div>
             </div>
@@ -60,21 +60,27 @@
     <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Form Division</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="name">Division Name</label>
-                        <input class="form-control" type="text" id="name" required=""
-                            placeholder="Division Name">
+                <form action="" id="form-divisi">
+                    @csrf
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Form Division</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
+                    <div class="modal-body">
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="name">Division Name</label>
+                            <input class="form-control" type="text" name="name" id="name" required=""
+                                placeholder="Division Name">
+                            <div id="invalid-name" class="invalid-feedback">
+                            </div>
+                            <input type="text" name="param" hidden>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div>
@@ -91,8 +97,8 @@
                 serverSide: true,
                 ajax: "{{ route('division.datatables') }}",
                 columns: [{
-                        data: 'rownum',
-                        name: 'rownum'
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex'
                     },
                     {
                         data: 'name',
@@ -106,6 +112,115 @@
                     },
                 ]
             });
+
+            $('.add').on('click', function() {
+                $('#name').val('')
+                $('input[name="param"]').val('')
+            })
+
+            $('#form-divisi').on('submit', function(e) {
+                e.preventDefault();
+                $(".preloader").fadeIn()
+                $.ajax({
+                    url: "{{ route('division.save') }}",
+                    type: "post",
+                    data: $(this).serialize(),
+                    dataType: "json",
+                    success: function(response) {
+                        $(".preloader").fadeOut()
+                        if (response.error) {
+                            if (response.error.name) {
+                                $('#name').addClass('is-invalid')
+                                $('#invalid-name').html(response.error.name)
+                            } else {
+                                $('#name').removeClass('is-invalid')
+                                $('#invalid-name').html('')
+                            }
+                        } else {
+                            table.ajax.reload();
+                            $('#myModal').modal('hide')
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: response.success,
+                                showConfirmButton: false,
+                                toast: true,
+                                timer: 1500
+                            })
+                        }
+                    }
+                })
+            })
+
+            $(document).on('click', '.edit', function() {
+                $(".preloader").fadeIn()
+                $.ajax({
+                    url: "{{ route('division.edit') }}",
+                    type: "post",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        param: $(this).attr('data-param')
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        $(".preloader").fadeOut()
+                        if (response.success) {
+                            $('#myModal').modal('show')
+                            $('#name').val(response.success.name)
+                            $('input[name="param"]').val(response.success.id)
+                        } else {
+                            Swal.fire(
+                                'Ups?',
+                                response.error,
+                                'warning'
+                            )
+                        }
+                    }
+                })
+            })
+
+            $(document).on('click', '.delete', function() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('division.delete') }}",
+                            type: "post",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                param: $(this).attr('data-param')
+                            },
+                            dataType: "json",
+                            success: function(response) {
+                                if (response.success) {
+                                    table.ajax.reload();
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: response.success,
+                                        showConfirmButton: false,
+                                        toast: true,
+                                        timer: 1500
+                                    })
+                                } else {
+                                    Swal.fire(
+                                        'Ups?',
+                                        response.error,
+                                        'warning'
+                                    )
+                                }
+                            }
+                        })
+                    }
+                })
+            })
         });
     </script>
 @endsection

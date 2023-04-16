@@ -10,6 +10,7 @@ class Level extends Controller
 {
     public function index()
     {
+        \LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
         return view('pages/level/index');
     }
 }

@@ -63,26 +63,54 @@
                 <div class="card" id="set" style="display: none">
                     <div class="card-body">
                         <form action="" id="form-setting">
-                            <input type="text" id="param-form"
+                            <input type="text" id="param-form" hidden
                                 value="<?= request()->get('form') ? request()->get('form') : '' ?>">
+                            <input type="text" id="is-edit" value="true" hidden>
+                            <input type="text" id="is-delet-approver" hidden>
                             <div class="col-md-6 mb-4">
                                 <div class="form-group">
-                                    <label for="parent-page">Set Page <small class="text-danger">(mandatory)</small>
-                                        <br><small class="text-info">form
-                                            will be displayed on
-                                            the selected
-                                            page</small></label>
+                                    <label for="parent-page">Set Entry Page <small class="text-danger">*</small>
+                                        <br>
+                                        <small class="text-info">form will be displayed on the selected page</small>
+                                    </label>
                                     <select name="parent-page" id="parent-page" class="form-control">
                                         <option value="">--Choose Page--</option>
                                         @foreach ($page as $p)
-                                            <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                            <option data-param="{{ $p->parent }}" value="{{ $p->id }}"
+                                                data-divisi="{{ $p->id_divisi }}"
+                                                {{ $selected_page ? ($p->id == $selected_page->id ? 'selected' : '') : '' }}>
+                                                {{ $p->name }}
+                                            </option>
                                         @endforeach
                                     </select>
+                                    <div id="invalid-parent-page" class="invalid-feedback">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-group">
+                                    <label for="report-page">Set Report Page <small class="text-danger">*</small>
+                                        <br>
+                                        <small class="text-info">form will be displayed on the selected page</small>
+                                    </label>
+                                    <select name="report-page" id="report-page" class="form-control">
+                                        <option value="">--Select Page Report--</option>
+                                        @if ($report)
+                                            @foreach ($report as $r)
+                                                <option value="{{ $r->id }}" selected>{{ $r->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div id="invalid-report-page" class="invalid-feedback">
+                                    </div>
                                 </div>
                             </div>
                             {{-- </div> --}}
-                            <h5 class="m-0">Set Approver</h5>
-                            <small class="text-info">select user as approver</small>
+                            <h5 class="m-0">Set Approver <small class="text-danger">*</small></h5>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-info">select user as approver</small>
+                                <a href="javascript:void(0)" class="badge bg-primary more-approver">Add approval</a>
+                            </div>
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -93,22 +121,48 @@
                                     </tr>
                                 </thead>
                                 <tbody id="approver-append">
-                                    <tr>
-                                        <td><input name="approver-name[]" type="text" class="form-control"></td>
-                                        <td>
-                                            <select name="user-approver[]" id="" class="form-control">
-                                                <option value="">--Select Approver--</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <select name="page-approver[]" id="page-approver" class="form-control">
-                                                <option value="">--Select Page Approver--</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <a href="javascript:void(0)" class="btn btn-success more-approver">+</a>
-                                        </td>
-                                    </tr>
+                                    @if ($selected_approver)
+                                        @foreach ($selected_approver as $sp)
+                                            <tr>
+                                                <td>
+                                                    <input name="approver-name[]" data-id="{{ $sp->id }}"
+                                                        type="text" class="form-control" value="{{ $sp->name }}">
+                                                    <div id="invalid-approver-name" class="invalid-feedback">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <select name="user-approver[]" id="" class="form-control">
+                                                        <option value="">--Select Approver--</option>
+                                                        @foreach ($user as $u)
+                                                            <option value="{{ $u->id }}"
+                                                                {{ $sp->id_user_approver == $u->id ? 'selected' : '' }}>
+                                                                {{ $u->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div id="invalid-user-approver" class="invalid-feedback">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <select name="page-approver[]" id="page-approver"
+                                                        class="form-control">
+                                                        <option value="">--Select Page Approver--</option>
+                                                        @foreach ($approver as $a)
+                                                            <option value="{{ $a->id }}"
+                                                                {{ $sp->id_menu == $a->id ? 'selected' : '' }}>
+                                                                {{ $a->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div id="invalid-page-approver" class="invalid-feedback">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <a href="javascript:void(0)" data-id="{{ $sp->id }}"
+                                                        class="btn btn-danger dell-approver">-</a>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
                                 </tbody>
                             </table>
                             <a href="javascript:void(0)"
@@ -123,7 +177,8 @@
         <!-- End Top Leader Table -->
     </div>
     <!--End Container fluid  -->
-    <div id="formName" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="formNameLabel" aria-hidden="true">
+    <div id="formName" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="formNameLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -210,6 +265,14 @@
                                 class="d-block py-3 text-center bg-gray">Text
                                 Field
                                 <input type="radio" id="pic-text-field" hidden name="type_field" value="text">
+                            </label>
+                        </div>
+
+                        <div class="col-md-4 mb-2">
+                            <label role="button" for="pic-number-field" data-select-radio
+                                class="d-block py-3 text-center bg-gray">Number
+                                Field
+                                <input type="radio" id="pic-number-field" hidden name="type_field" value="number">
                             </label>
                         </div>
 
@@ -679,6 +742,28 @@
                 $('.prev').trigger('click')
                 return false
             }
+            console.log($('input[name="approver-name[]"]').length)
+
+            if ($('input[name="approver-name[]"]').length == 0) {
+                Swal.fire(
+                    'Ups?',
+                    'Please add approver',
+                    'warning'
+                )
+
+                return false
+            }
+            // $('select[name="page-approver[]"]').each(function(i, obj) {
+            //     if ($(this).val() == '') {
+            //         $(this).addClass('is-invalid')
+            //         $(this).next().html('approvers cannot be the same')
+            //     }
+
+            //     if ($(this).val() != '') {
+            //         $(this).removeClass('is-invalid')
+            //         $(this).next().html('')
+            //     }
+            // });
 
             formBuild()
 
@@ -687,15 +772,36 @@
             $('.ck-editor').remove()
             $('input[data-checkbox]').remove()
 
-            $('div[data-css]').each(function(i) {
-                $(this).removeClass(
-                    'border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray'
-                )
+            // $('div[data-css]').each(function(i) {
+            //     $(this).removeClass(
+            //         'border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray'
+            //     )
+            // });
+
+            $('div[data-field-label]').each(function(i) {
+                $(this).removeClass('mb-3')
             });
 
             let form = []
             $('div[data-form-final]').each(function(i, obj) {
                 form.push($(this).html());
+            });
+
+            let id_approver = []
+            let approver_name = []
+            $('input[name="approver-name[]"]').each(function(i, obj) {
+                approver_name.push($(this).val());
+                id_approver.push($(this).attr('data-id'));
+            });
+
+            let approver_user = []
+            $('select[name="user-approver[]"]').each(function(i, obj) {
+                approver_user.push($(this).val());
+            });
+
+            let page_approver = []
+            $('select[name="page-approver[]"]').each(function(i, obj) {
+                page_approver.push($(this).val());
             });
 
             $.ajax({
@@ -705,12 +811,119 @@
                     _token: "{{ csrf_token() }}",
                     form_name: $('input[name="form_name"]').val(),
                     html_preview: form,
-                    param_html: $('#html_form').val()
+                    param_html: $('#html_form').val(),
+                    set_page: $('select[name=parent-page] option').filter(':selected').val(),
+                    report_page: $('select[name=report-page] option').filter(':selected').val(),
+                    is_edit: $('#is-edit').val(),
+                    id_approver: id_approver,
+                    delete_approver: $('#is-delet-approver').val(),
+                    approver_name: approver_name,
+                    approver_user: approver_user,
+                    page_approver: page_approver
                 },
                 dataType: "json",
                 success: function(response) {
                     $(".preloader").fadeOut()
-                    window.location.href = "{{ route('formBuilder') }}";
+                    if (response.error) {
+                        if (response.error.page) {
+                            $('#parent-page').addClass('is-invalid')
+                            $('#invalid-parent-page').html(response.error.page)
+                        } else {
+                            $('#parent-page').removeClass('is-invalid')
+                            $('#invalid-parent-page').html('')
+                        }
+
+                        if (response.error.report) {
+                            $('#report-page').addClass('is-invalid')
+                            $('#invalid-report-page').html(response.error.report)
+                        } else {
+                            $('#report-page').removeClass('is-invalid')
+                            $('#invalid-report-page').html('')
+                        }
+
+                        if (response.error.name_approver) {
+                            let val_approver_name = ''
+                            $('input[name="approver-name[]"]').each(function(i, obj) {
+                                if ($(this).val() == '') {
+                                    $(this).addClass('is-invalid')
+                                    $(this).next().html('name approvers cannot be empty')
+                                } else {
+                                    $(this).removeClass('is-invalid')
+                                    $(this).next().html('')
+                                }
+
+                                if ($(this).val() != '') {
+                                    if (val_approver_name == $(this).val()) {
+                                        $(this).addClass('is-invalid')
+                                        $(this).next().html('name approvers cannot be the same')
+                                    } else {
+                                        $(this).removeClass('is-invalid')
+                                        $(this).next().html('')
+                                    }
+                                }
+
+                                if ($(this).val() != '') {
+                                    val_approver_name = $(this).val()
+                                }
+                            });
+                        }
+
+                        if (response.error.user_approver) {
+                            let val_user_approver = ''
+                            $('select[name="user-approver[]"]').each(function(i, obj) {
+                                if ($(this).val() == '') {
+                                    $(this).addClass('is-invalid')
+                                    $(this).next().html('user approvers cannot be empty')
+                                } else {
+                                    $(this).removeClass('is-invalid')
+                                    $(this).next().html('')
+                                }
+
+                                if ($(this).val() != '') {
+                                    if (val_user_approver == $(this).val()) {
+                                        $(this).addClass('is-invalid')
+                                        $(this).next().html('user approvers cannot be the same')
+                                    } else {
+                                        $(this).removeClass('is-invalid')
+                                        $(this).next().html('')
+                                    }
+                                }
+
+                                if ($(this).val() != '') {
+                                    val_user_approver = $(this).val()
+                                }
+                            });
+                        }
+
+                        if (response.error.page_approver) {
+                            let val_page_appover = ''
+                            $('select[name="page-approver[]"]').each(function(i, obj) {
+                                if ($(this).val() == '') {
+                                    $(this).addClass('is-invalid')
+                                    $(this).next().html('page approvers cannot be empty')
+                                } else {
+                                    $(this).removeClass('is-invalid')
+                                    $(this).next().html('')
+                                }
+
+                                if ($(this).val() != '') {
+                                    if (val_page_appover == $(this).val()) {
+                                        $(this).addClass('is-invalid')
+                                        $(this).next().html('page approvers cannot be the same')
+                                    } else {
+                                        $(this).removeClass('is-invalid')
+                                        $(this).next().html('')
+                                    }
+                                }
+
+                                if ($(this).val() != '') {
+                                    val_page_appover = $(this).val()
+                                }
+                            });
+                        }
+                    } else {
+                        window.location.href = "{{ route('formBuilder') }}";
+                    }
                 }
             })
         })
@@ -782,7 +995,8 @@
                 data: {
                     _token: "{{ csrf_token() }}",
                     id: $(this).attr('id-field'),
-                    name: val.replace(/\s+/g, '-').toLowerCase()
+                    name: val.replace(/\s+/g, '-').toLowerCase(),
+                    original_name: val
                 }
             }
 
@@ -845,36 +1059,103 @@
 
         $('#parent-page').on('change', function() {
             if ($('select[name=parent-page] option').filter(':selected').val() != '') {
+                var url_string = window.location.href;
+                var url = new URL(url_string);
+                var c = url.searchParams.get("form");
+                var datas;
+
+                if (c != null) {
+                    datas = {
+                        _token: "{{ csrf_token() }}",
+                        parent: $('select[name=parent-page] option').filter(':selected').attr('data-param'),
+                        is_edit: c
+                    }
+                } else {
+                    datas = {
+                        _token: "{{ csrf_token() }}",
+                        parent: $('select[name=parent-page] option').filter(':selected').attr('data-param'),
+                    }
+                }
+
                 $.ajax({
                     url: "{{ route('formBuilder.getpageapprover') }}",
                     type: "post",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        parent: $('select[name=parent-page] option').filter(':selected').val()
-                    },
+                    data: datas,
                     dataType: "json",
                     success: function(response) {
-                        $('select[name="page-approver"]').each(function(i) {
-                            $(this).html('<option value="">--Select Page Approver--</option>')
-                            for (let index = 0; index < response.data.length; index++) {
-                                $(this).append('<option value="">' + response.data[index].name +
-                                    '</option>')
+                        if (response.success) {
+                            $('select[name="page-approver[]"]').each(function(i) {
+                                $(this).html(
+                                    '<option value="">--Select Page Approver--</option>')
+                                for (let index = 0; index < response.success.data
+                                    .length; index++) {
+                                    $(this).append('<option value="' + response.success.data[
+                                            index].id +
+                                        '">' + response.success.data[index].name +
+                                        '</option>')
+                                }
+                            })
+
+                            if (response.success.report) {
+                                $('select[name="report-page"]').prop('disabled', false)
+                                $('#report-page').html(
+                                    '<option value="">--Select Page Report--</option>')
+
+                                for (let i = 0; i < response.success.report.length; i++) {
+                                    $('#report-page').append(
+                                        '<option value="' + response.success.report[i].id +
+                                        '">' + response.success.report[i].name +
+                                        '</option>')
+                                }
                             }
-                        })
+                        } else {
+
+                        }
                     }
                 })
             }
         })
 
         $('.more-approver').on('click', function() {
+
+            if ($('select[name=parent-page] option').filter(':selected').val() == '') {
+                Swal.fire(
+                    'Ups?',
+                    'Please select an entry page first',
+                    'warning'
+                )
+
+                return false
+            }
+
             $.ajax({
                 url: "{{ route('formBuilder.moreapprover') }}",
-                type: "get",
+                type: "post",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    parent: $('select[name=parent-page] option').filter(':selected').attr('data-param'),
+                    divisi: $('select[name=parent-page] option').filter(':selected').attr('data-divisi'),
+                },
                 dataType: "json",
                 success: function(response) {
-                    $('#approver-append').append(response.data)
+                    if (response.error) {
+                        Swal.fire(
+                            'Ups?',
+                            response.error,
+                            'warning'
+                        )
+                    } else {
+                        $('#approver-append').append(response.data)
+                    }
                 }
             })
+        })
+
+        $(document).on('click', '.dell-approver', function() {
+            let data_id = $(this).attr('data-id')
+            let val_now = $('#is-delet-approver').val()
+            $('#is-delet-approver').attr('value', val_now == '' ? data_id : val_now + ',' + data_id)
+            $(this).closest("tr").remove();
         })
 
         function typefield(field) {
@@ -886,6 +1167,9 @@
                     break;
                 case 'text':
                     countField = $('.input-text').length
+                    break;
+                case 'number':
+                    countField = $('.input-number').length
                     break;
                 case 'date':
                     countField = $('.input-date').length

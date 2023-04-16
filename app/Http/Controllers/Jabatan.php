@@ -11,6 +11,7 @@ class Jabatan extends Controller
 {
     public function index()
     {
+        \LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
         return view('pages/jabatan/index');
     }
 
@@ -24,7 +25,7 @@ class Jabatan extends Controller
             $validator = Validator::make(
                 $request->all(),
                 [
-                    'name' => 'required',
+                    'name' => 'required|unique:position,name,' . $request->param,
                     'param' => 'required|integer|regex:/^([0-9]+)$/|not_in:0',
                 ]
             );
@@ -41,7 +42,7 @@ class Jabatan extends Controller
             ]);
         } else {
             $validator = Validator::make($request->all(), [
-                'name' => 'required',
+                'name' => 'required|unique:position,name',
             ]);
 
             if ($validator->fails()) {
@@ -59,6 +60,7 @@ class Jabatan extends Controller
         DB::beginTransaction();
         try {
             DB::commit();
+            \LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
             $msg = [
                 'success' => 'Position saved successfully'
             ];
@@ -82,6 +84,7 @@ class Jabatan extends Controller
             return response()->json(['error' => ['msg' => 'Position not found']]);
         }
 
+        \LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
         return response()->json(['success' => ['data' => $validasi]]);
     }
 
@@ -97,6 +100,7 @@ class Jabatan extends Controller
             return response()->json(['error' => ['msg' => 'Position not found']]);
         }
 
+        \LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
         DB::table('position')->where('id', $request->param)->delete();
         return response()->json(['success' => ['msg' => 'Position deleted successfully']]);
     }

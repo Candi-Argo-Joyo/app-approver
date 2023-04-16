@@ -105,8 +105,8 @@
                 serverSide: true,
                 ajax: "{{ route('poistion.datatables') }}",
                 columns: [{
-                        data: 'rownum',
-                        name: 'rownum'
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex'
                     },
                     {
                         data: 'name',

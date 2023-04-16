@@ -89,19 +89,24 @@
                 <!-- ============================================================== -->
                 <!-- create new -->
                 <!-- ============================================================== -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i data-feather="settings" class="svg-icon"></i>
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{{ route('users') }}">Users</a>
-                        <a class="dropdown-item" href="{{ route('level') }}">Level</a>
-                        <a class="dropdown-item" href="{{ route('settingweb') }}">Setting SSO/WEB</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="{{ route('dataMenu') }}">Data Menu</a>
-                    </div>
-                </li>
+                @if (Auth::user()->role == 'administrator')
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="settings" class="svg-icon"></i>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="{{ route('users') }}">Users</a>
+                            {{-- <a class="dropdown-item" href="{{ route('level') }}">Level</a> --}}
+                            <a class="dropdown-item" href="{{ route('settingweb') }}">Setting SSO/WEB</a>
+                            <a class="dropdown-item" href="{{ route('settingmail') }}">Setting Mail</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ route('dataMenu') }}">Data Menu</a>
+                            <a class="dropdown-item" href="{{ route('log') }}">Logs</a>
+                        </div>
+                    </li>
+                @endif
+
                 <li class="nav-item d-none d-md-block">
                     <a class="nav-link" href="javascript:void(0)">
                         <div class="customize-input">
@@ -118,6 +123,12 @@
                     <div id='google_translate_element'></div>
                 </li>
             </ul>
+
+            @if (Auth::user()->role != 'administrator')
+                <ul class="navbar-nav">
+                    <span class="divisi">Divisi IT</span>
+                </ul>
+            @endif
             <!-- ============================================================== -->
             <!-- Right side toggle and nav items -->
             <!-- ============================================================== -->
@@ -128,17 +139,18 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="javascript:void(0)" data-bs-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
-                        <img src="{{ asset('assets/images/users/profile-pic.jpg') }}" alt="user"
-                            class="rounded-circle" width="40">
-                        <span class="ms-2 d-none d-lg-inline-block"><span>Hello,</span> <span class="text-dark">Jason
-                                Doe</span> <i data-feather="chevron-down" class="svg-icon"></i></span>
+                        {{-- <img src="{{ asset('assets/images/users/profile-pic.jpg') }}" alt="user"
+                            class="rounded-circle" width="40"> --}}
+                        <span class="ms-2 d-none d-lg-inline-block"><span>Hello,</span> <span
+                                class="text-dark">{{ Auth::user()['name'] }}</span> <i data-feather="chevron-down"
+                                class="svg-icon"></i></span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end dropdown-menu-right user-dd animated flipInY">
-                        <a class="dropdown-item" href="javascript:void(0)"><i data-feather="user"
+                        {{-- <a class="dropdown-item" href="javascript:void(0)"><i data-feather="user"
                                 class="svg-icon me-2 ms-1"></i>
-                            My Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <div class="dropdown-divider"></div>
+                            My Profile</a> --}}
+                        {{-- <div class="dropdown-divider"></div> --}}
+                        {{-- <div class="dropdown-divider"></div> --}}
                         <a class="dropdown-item" href="javascript:void(0)"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i
                                 data-feather="power" class="svg-icon me-2 ms-1"></i>
@@ -146,7 +158,7 @@
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                             @csrf
                         </form>
-                        <div class="dropdown-divider"></div>
+                        {{-- <div class="dropdown-divider"></div> --}}
                     </div>
                 </li>
                 <!-- ============================================================== -->
