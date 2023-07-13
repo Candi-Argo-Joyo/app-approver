@@ -48,7 +48,7 @@
                         <div class="text-center">
                             <img src="../images/KDDI_Logo.svg.png" style="width: 120px" alt="wrapkit">
                         </div>
-                        <h2 class="mt-3 text-center">Login Admin</h2>
+                        <h2 class="mt-3 text-center">Login Area</h2>
                         {{-- <p class="text-center">Enter your username and password to access application.</p> --}}
                         <form method="POST" action="{{ route('login') }}" class="mt-4">
                             @csrf

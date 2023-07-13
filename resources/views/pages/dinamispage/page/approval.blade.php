@@ -32,23 +32,14 @@
                                         <th>#</th>
                                         <th>Form Name</th>
                                         <th>Created By</th>
-                                        <th>Created At</th>
+                                        <th>Validate By</th>
                                         <th>Status</th>
+                                        <th>Created At</th>
+                                        <th>Validate At</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{-- <tr>
-                                        <td>1</td>
-                                        <td>PT Batang Panjang</td>
-                                        <td>Jl Seroa Jawa Tengah Kota Pekalongan</td>
-                                        <td>DCA0191</td>
-                                        <td>Sahroni</td>
-                                        <td>
-                                            <a href="javascript:void(0)" class="badge bg-success">Preview</a>
-                                            <a href="javascript:void(0)" class="badge bg-primary">Approve</a>
-                                        </td>
-                                    </tr> --}}
                                 </tbody>
                             </table>
                         </div>

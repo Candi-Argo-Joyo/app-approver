@@ -1,14 +1,49 @@
 @extends('index')
 @section('title', 'Level | Aprover KDDI')
 @section('css')
-    <link rel="stylesheet" href="{{ asset('dist/css/select2.min.css') }}" />
     <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
     <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="{{ asset('dist/css/select2.min.css') }}" />
 @endsection
 @section('content')
     <style>
-        .select2-dropdown.increasezindex {
-            z-index: 99999;
+        .select2-container--default .select2-selection--multiple {
+            background-color: unset;
+            padding: 6px 12px;
+        }
+
+        /* .select2-container .select2-selection--single {
+                        height: unset;
+                    } */
+
+        .select2-container--default .select2-selection--multiple .select2-selection__arrow {
+            height: 37px;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            line-height: unset;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #e9ecef;
+        }
+
+        .is-invalid .select2-selection,
+        .needs-validation~span>.select2-dropdown {
+            border-color: var(--bs-danger) !important;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border: 1px solid #e9ecef;
+        }
+
+        .select2-container .select2-search--inline .select2-search__field {
+            vertical-align: unset;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            margin-left: unset;
+            margin-top: unset;
         }
     </style>
     <!-- ============================================================== -->
@@ -104,8 +139,9 @@
                             <div class="form-group mb-3">
                                 <label class="form-label" for="address">Access Control Menu</label>
                                 <select name="" id="control" class="form-control" multiple>
-                                    <option value="Dashboard">Dashboard</option>
-                                    <option value="Dealer">Dealer</option>
+                                    <option value="Dashboard">Digital Asign</option>
+                                    <option value="Dealer">Data Items</option>
+                                    <option value="Dealer">Form Builder</option>
                                 </select>
                             </div>
                         </div>
@@ -124,12 +160,11 @@
     <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
     <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
     <script src="{{ asset('dist/js/select2.min.js') }}"></script>
-    {{-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> --}}
     <script>
         $(document).ready(function() {
             $('#control').select2({
                 placeholder: "--Plih Control Menu--",
-                dropdownCssClass: 'increasezindex',
+                dropdownParent: $("#myModal"),
                 width: '100%'
             });
         });

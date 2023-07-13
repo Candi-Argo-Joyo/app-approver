@@ -16,6 +16,7 @@ use App\Http\Controllers\Datatables\DatatablesContoller;
 use App\Http\Controllers\Jabatan;
 use App\Http\Controllers\DigitalAsign;
 use App\Http\Controllers\Divisi;
+use App\Http\Controllers\Items;
 // use App\Http\Controllers\EntryKredit;
 use App\Http\Controllers\Log;
 // use App\Http\Controllers\Knowledge;
@@ -52,6 +53,9 @@ Route::group(['middleware' => 'checkRole:administrator'], function () {
         Route::get('/datatables-hast-mappig', 'datatablesHastMapping')->name('hastmapping.datatables');
         Route::get('/datatables-un-mappig', 'datatablesUnMapping')->name('untmapping.datatables');
         Route::get('/datatables-logs', 'datatablesLogs')->name('logs.datatables');
+        Route::get('/datatables-asign', 'datatablesAsign')->name('asign.datatables');
+        Route::get('/datatables-group-item', 'datatablesGroupItem')->name('groupitem.datatables');
+        Route::get('/datatables-items', 'datatablesItems')->name('items.datatables');
     });
 
     Route::controller(Jabatan::class)->group(function () {
@@ -82,10 +86,24 @@ Route::group(['middleware' => 'checkRole:administrator'], function () {
 
     Route::controller(DigitalAsign::class)->group(function () {
         Route::get('/digital-asign', 'index')->name('digitalAsign');
+        Route::post('/digital-asign/save', 'save')->name('digitalAsign.save');
+        Route::post('/digital-asign/del', 'delete')->name('digitalAsign.del');
+    });
+
+    Route::controller(Items::class)->group(function () {
+        Route::get('/digital-items', 'index')->name('items');
+        Route::get('/digital-items/get-group', 'getAllGroupItems')->name('items.getgroup');
+        Route::post('/digital-items/save-group', 'save_group')->name('items.save_group');
+        Route::post('/digital-items/edit', 'edit')->name('items.edit');
+        Route::post('/digital-items/delete', 'delete')->name('items.delete');
+        Route::post('/digital-items/save-item', 'save_item')->name('items.save_item');
+        Route::post('/digital-items/edit-item', 'editItem')->name('items.edititem');
+        Route::post('/digital-items/delete-item', 'deleteItem')->name('items.deleteitem');
     });
 
     Route::controller(Users::class)->group(function () {
         Route::get('/users', 'index')->name('users');
+        Route::post('/users/get', 'getUsers')->name('users.get');
         Route::post('/users/save', 'save')->name('users.save');
         Route::post('/users/edit', 'edit')->name('users.edit');
         Route::post('/users/delete', 'delete')->name('users.delete');
@@ -103,14 +121,11 @@ Route::group(['middleware' => 'checkRole:administrator'], function () {
     Route::controller(MailSetting::class)->group(function () {
         Route::get('/setting-mail', 'index')->name('settingmail');
         Route::post('/setting-mail/save', 'save')->name('settingmail.save');
+        Route::get('/setting-mail/test-mail', 'sendMail')->name('settingmail.testmail');
     });
 
     Route::controller(DataMenu::class)->group(function () {
         Route::get('/data-menu', 'index')->name('dataMenu');
-        Route::get('/data-menu/get-group', 'getGroupAll')->name('dataMenu.getGroupAll');
-        Route::post('/data-menu/save-group', 'saveGroup')->name('dataMenu.savegroup');
-        Route::post('/data-menu/get-one-group', 'getOneGroup')->name('dataMenu.delonegroup');
-        Route::post('/data-menu/delete-group', 'delGroup')->name('dataMenu.delgroup');
         Route::post('/data-menu/save-menu', 'saveMenu')->name('dataMenu.saveMenu');
         Route::post('/data-menu/edit-menu', 'editMenu')->name('dataMenu.editMenu');
         Route::post('/data-menu/delete-menu', 'deleteMenu')->name('dataMenu.deleteMenu');
@@ -119,19 +134,24 @@ Route::group(['middleware' => 'checkRole:administrator'], function () {
         Route::post('/data-menu/get-parent-menu', 'getParentMenu')->name('dataMenu.getParentMenu');
         Route::post('/data-menu/page-parent-menu', 'pageParentMenu')->name('dataMenu.pageParentMenu');
         Route::post('/data-menu/save-page-menu', 'savePageMenu')->name('dataMenu.savePageMenu');
+        Route::post('/data-menu/delete-page-menu', 'deletePageMenu')->name('dataMenu.deletePageMenu');
+        Route::post('/data-menu/change-status', 'changeStatus')->name('dataMenu.changeStatus');
     });
 });
 
-Route::group(['middleware' => 'checkRole:administrator,manager'], function () {
+Route::group(['middleware' => 'checkRole:administrator,manager,validator'], function () {
     Route::controller(FormBuilder::class)->group(function () {
         Route::get('/form-builder', 'index')->name('formBuilder');
+        Route::get('/form-builder/add-validation', 'addValidation')->name('formBuilder.addValidation');
         Route::get('/form-builder/add', 'add')->name('formBuilder.add');
+        Route::post('/form-builder/get-report-approval', 'getReportApproval')->name('formBuilder.getReportApproval');
         Route::post('/form-builder/update-html-form', 'updateFormHtml')->name('formBuilder.updateformhtml');
         Route::post('/form-builder/create-layout', 'createForm')->name('formBuilder.createform');
         Route::post('/form-builder/get-layout', 'getLayout')->name('formBuilder.getlayout');
         Route::post('/form-builder/del-layout', 'delLayout')->name('formBuilder.dellayout');
         Route::post('/form-builder/get-field', 'getField')->name('formBuilder.getfield');
         Route::post('/form-builder/rename-field', 'renameField')->name('formBuilder.renamefield');
+        Route::post('/form-builder/rename-field-item', 'renameFieldItems')->name('formBuilder.renamefielditems');
         Route::post('/form-builder/delete-field', 'delField')->name('formBuilder.delfield');
         Route::get('/form-builder/del-form', 'delForm')->name('formBuilder.delform');
         Route::post('/form-builder/get-option', 'getOption')->name('formBuilder.getoption');
@@ -147,15 +167,17 @@ Route::group(['middleware' => 'checkRole:administrator,manager'], function () {
     });
 });
 
-Route::group(['middleware' => 'checkRole:administrator,user,manager'], function () {
+Route::group(['middleware' => 'checkRole:administrator,user,manager,validator'], function () {
     Route::controller(DatatablesContoller::class)->group(function () {
         Route::get('/datatables-entry-page', 'datatablesentry')->name('entrypage.datatables');
         Route::get('/datatables-approval-page', 'datatablesapproval')->name('approvalpage.datatables');
+        Route::get('/datatables-validator-page', 'datatablesvalidator')->name('validatorpage.datatables');
         Route::get('/datatables-data-page', 'datatablesData')->name('datapage.datatables');
     });
 
     Route::controller(Dashboard::class)->group(function () {
         Route::get('/', 'index')->name('dashboard');
+        Route::get('/count-user', 'count')->name('dashboard.count');
     });
 
     Route::controller(DataMenu::class)->group(function () {
@@ -166,6 +188,9 @@ Route::group(['middleware' => 'checkRole:administrator,user,manager'], function 
         Route::get('/pages', 'index')->name('pages');
         Route::post('/save-data', 'save')->name('pages.save');
         Route::post('/delete-data', 'deleteInsertForm')->name('pages.delete');
+        Route::post('/validate-data', 'validateData')->name('pages.validate');
+        Route::post('/approve-data', 'approveData')->name('pages.approve');
+        Route::post('/get-item', 'getItem')->name('pages.items');
     });
 
     Route::controller(Log::class)->group(function () {

@@ -53,13 +53,20 @@
                                         border-bottom: 1px solid #ddd;
                                         padding: 10px
                                     }
+
+                                    .title {
+                                        border: unset;
+                                        background: #ededed;
+                                        padding: 5px 10px 5px 10px;
+                                    }
                                 </style>
-                                <div style="font-size: 12px">
+                                <div>
                                     <table>
                                         @foreach ($layout as $l)
                                             <?php $field = DB::table('form_field')
                                                 ->where('id_html_form', $menu->id_html_form)
                                                 ->where('id_form_layout', $l->id)
+                                                ->orderBy('id', 'asc')
                                                 ->get(); ?>
                                             @if ($l->jenis == 'column-1')
                                                 @foreach ($field as $f)
@@ -67,81 +74,149 @@
                                                         ->where('id_html_form', $menu->id_html_form)
                                                         ->where('label', $f->field_name)
                                                         ->first(); ?>
-                                                    <tr>
-                                                        @if ($f->type == 'title')
-                                                            <td colspan="4" style="border: unset; background:#ededed">
+                                                    @if ($f->type == 'title')
+                                                        <tr>
+                                                            <td colspan="6" class="title">
                                                                 {{ $f->original_name }}</td>
+                                                        </tr>
+                                                    @else
+                                                        @if ($f->type == 'textarea')
+                                                            <tr>
+                                                                <td colspan="6" style="min-width: 100px">
+                                                                    {{ $f->original_name }}
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="6" style="min-width: 215px">
+                                                                    {!! $value->value !!}
+                                                                </td>
+                                                            </tr>
                                                         @else
-                                                            <td style="min-width: 100px">{{ $f->original_name }}
-                                                            </td>
-                                                            <td style="min-width: 215px">{{ $value->value }}
-                                                            </td>
+                                                            <tr>
+                                                                <td colspan="4" style="min-width: 100px">
+                                                                    {{ $f->original_name }}
+                                                                </td>
+                                                                <td colspan="4" style="min-width: 215px">
+                                                                    {!! $value->value !!}
+                                                                </td>
+                                                            </tr>
                                                         @endif
-                                                    </tr>
+                                                    @endif
                                                 @endforeach
                                             @endif
                                             @if ($l->jenis == 'column-2')
                                                 <tr>
-                                                    <td colspan="4" style="padding: 5px"></td>
+                                                    <td colspan="6" style="padding: 2px"></td>
                                                 </tr>
                                                 <?php $no = 0; ?>
                                                 @foreach ($field as $f)
+                                                    <?php $no++; ?>
                                                     <?php $value = DB::table('insert_form')
                                                         ->where('id_html_form', $menu->id_html_form)
                                                         ->where('label', $f->field_name)
                                                         ->first(); ?>
                                                     @if ($f->type == 'title')
-                                                        <td colspan="4">
+                                                        <td colspan="3" class="title">
                                                             {{ $f->original_name }}</td>
                                                     @else
-                                                        <td style="min-width: 115px">{{ $f->original_name }}
+                                                        <td colspan="2" style="min-width: 100px">{{ $f->original_name }}
                                                         </td>
-                                                        <td style="min-width: 215px">{{ $value->value }}
+                                                        <td style="min-width: 150px">: {!! $value->value !!}
                                                         </td>
                                                     @endif
-                                                    @if ($no % 2 != 0)
+                                                    @if ($no % 2 == 0)
                                                         </tr>
                                                     @endif
-                                                    <?php $no++; ?>
+                                                @endforeach
+                                            @endif
+                                            @if ($l->jenis == 'column-3')
+                                                <tr>
+                                                    <td colspan="6" style="padding: 2px"></td>
+                                                </tr>
+                                                <?php $no2 = 0; ?>
+                                                @foreach ($field as $f)
+                                                    <?php $no2++; ?>
+                                                    <?php $value = DB::table('insert_form')
+                                                        ->where('id_html_form', $menu->id_html_form)
+                                                        ->where('label', $f->field_name)
+                                                        ->first(); ?>
+                                                    @if ($f->type == 'title')
+                                                        <td colspan="2" class="title">
+                                                            {{ $f->original_name }}</td>
+                                                    @else
+                                                        <td style="min-width: 15px">{{ $f->original_name }}
+                                                        </td>
+                                                        <td style="min-width: 50px">: {{ $value->value }}
+                                                        </td>
+                                                    @endif
+                                                    @if ($no2 % 3 == 0)
+                                                        </tr>
+                                                    @endif
                                                 @endforeach
                                             @endif
                                         @endforeach
                                         <tr>
-                                            <td colspan="4" style="padding: 5px"></td>
+                                            <td colspan="6" style="padding: 2px"></td>
                                         </tr>
                                     </table>
                                     <table>
                                         <tr>
                                             @if (count($approver) < 3)
                                                 @foreach ($approver as $app)
+                                                    <?php
+                                                    $img = DB::table('digital_asign')
+                                                        ->where('id_user', $app->id_user)
+                                                        ->first();
+                                                    $user = DB::table('users')
+                                                        ->where('id', $app->id_user)
+                                                        ->first();
+                                                    ?>
                                                     <td style="text-align: center; width:33%">
                                                         <div style="height: 150px;t;position: relative;">
                                                             <div style="position: absolute;top: 0;width: 100%;">
                                                                 {{ $app->name }}
                                                             </div>
-                                                            <img class="h-100"
-                                                                src="{{ asset('images/signature/Oprah-Winfrey-Signature-1.png') }}">
-                                                            <div style="position: absolute;bottom: 0;width: 100%;">
-                                                                <br>Atas Nama
-                                                            </div>
+                                                            @if ($img)
+                                                                <img class="h-100"
+                                                                    src="{{ asset('uploads/' . $img->image) }}">
+                                                            @endif
+                                                            @if ($user)
+                                                                <div style="position: absolute;bottom: 0;width: 100%;">
+                                                                    <br>{{ $user->name }}
+                                                                </div>
+                                                            @endif
                                                         </div>
                                                     </td>
                                                 @endforeach
-                                                <td style="text-align: center;width:33%">
-                                                    <div style="height: 150px;t;position: relative;">
-                                                    </div>
-                                                </td>
-                                                <td style="text-align: center;width:33%">
-                                                    <div style="height: 150px;t;position: relative;">
-                                                    </div>
-                                                </td>
+                                                @if (count($approver) < 2)
+                                                    <td style="text-align: center;width:33%">
+                                                        <div style="height: 150px;t;position: relative;">
+                                                        </div>
+                                                    </td>
+                                                    <td style="text-align: center;width:33%">
+                                                        <div style="height: 150px;t;position: relative;">
+                                                        </div>
+                                                    </td>
+                                                @else
+                                                    <td style="text-align: center;width:33%">
+                                                        <div style="height: 150px;t;position: relative;">
+                                                        </div>
+                                                    </td>
+                                                @endif
                                             @else
                                                 @foreach ($approver as $app)
+                                                    <?php $img = DB::table('digital_asign')
+                                                        ->where('id_user', $app->id_user)
+                                                        ->first(); ?>
                                                     <td style="text-align: center;">
                                                         <div style="height: 150px;t;position: relative;">
                                                             <div style="position: absolute;top: 0;width: 100%;">
                                                                 {{ $app->name }}
                                                             </div>
+                                                            @if ($img)
+                                                                <img class="h-100"
+                                                                    src="{{ asset('uploads/' . $img->image) }}">
+                                                            @endif
                                                             <div style="position: absolute;bottom: 0;width: 100%;">
                                                                 <br>Atas Nama
                                                             </div>

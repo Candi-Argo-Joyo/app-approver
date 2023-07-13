@@ -1,8 +1,8 @@
 @extends('index')
 @section('title', 'Digital Assign | Aprover KDDI')
 @section('css')
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css') }}">
 @endsection
 @section('content')
     <!-- ============================================================== -->
@@ -37,7 +37,7 @@
                     <div class="card-body">
                         <h4 class="card-title">List Digital Assign</h4>
                         <div class="table-responsive">
-                            <table id="zero_config" class="table border table-striped table-bordered text-nowrap">
+                            <table class="table border table-striped table-bordered text-nowrap asign">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -62,21 +62,6 @@
                                             <a href="#" class="badge bg-danger">Delete</a>
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>
-                                            <div style="height: 100px">
-                                                <img class="h-100"
-                                                    src="{{ asset('images/signature/XXXTentacion_signature.svg.png') }}"
-                                                    alt="">
-                                            </div>
-                                        </td>
-                                        <td>Manager 2</td>
-                                        <td>
-                                            <a href="#" class="badge bg-warning">Edit</a>
-                                            <a href="#" class="badge bg-danger">Delete</a>
-                                        </td>
-                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -90,33 +75,156 @@
     <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Form Dealer</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="name">Sign [image]</label>
-                        <input class="form-control" type="file" id="name" required=""
-                            placeholder="Michael Zenaty">
+                <form action="" id="form-asign">
+                    @csrf
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Form Dealer</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
-                    <div class="form-group mb-3">
-                        <label class="form-label" for="address">User</label>
-                        <select name="" id="user" class="form-control">
-                            <option value="">--Pilih User--</option>
-                        </select>
+                    <div class="modal-body">
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="file">Sign [image]</label>
+                            <input class="form-control" type="file" name="file" id="file">
+                            <div id="invalid-file" class="invalid-feedback">
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label" for="address">User</label>
+                            <select name="user" id="user" class="form-control">
+                                <option value="">--Pilih User--</option>
+                                @foreach ($users as $u)
+                                    <option value="{{ $u->id }}">{{ $u->name }} [role: {{ $u->role }}]
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div id="invalid-user" class="invalid-feedback">
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div>
 @endsection
 @section('script')
-    <script src="../assets/extra-libs/datatables.net/js/jquery.dataTables.min.js"></script>
-    <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
-    <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
+    <script src="{{ asset('assets/extra-libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('dist/js/pages/datatable/datatable-basic.init.js') }}"></script>
+    <script>
+        var table = $('.asign').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('asign.datatables') }}",
+            columns: [{
+                    data: 'DT_RowIndex',
+                    name: 'DT_RowIndex'
+                },
+                {
+                    data: 'img',
+                    name: 'img'
+                },
+                {
+                    data: 'name',
+                    name: 'name'
+                },
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false
+                },
+            ]
+        });
+
+        $('#form-asign').on('submit', function(e) {
+            e.preventDefault();
+            $(".preloader").fadeIn()
+            $.ajax({
+                url: "{{ route('digitalAsign.save') }}",
+                type: "post",
+                data: new FormData(this),
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                success: function(response) {
+                    $(".preloader").fadeOut()
+                    if (response.success) {
+                        Swal.fire({
+                            position: 'top-end',
+                            icon: 'success',
+                            title: response.success,
+                            showConfirmButton: false,
+                            toast: true,
+                            timer: 1500
+                        })
+                        table.ajax.reload();
+                        $('#myModal').modal('hide')
+                    } else {
+                        if (response.error.file) {
+                            $('#file').addClass('is-invalid')
+                            $('#invalid-file').html(response.error.file)
+                        } else {
+                            $('#file').removeClass('is-invalid')
+                            $('#invalid-file').html('')
+                        }
+
+                        if (response.error.user) {
+                            $('#user').addClass('is-invalid')
+                            $('#invalid-user').html(response.error.user)
+                        } else {
+                            $('#user').removeClass('is-invalid')
+                            $('#invalid-user').html('')
+                        }
+                    }
+                }
+            })
+        })
+
+        $(document).on('click', '.del', function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('digitalAsign.del') }}",
+                        type: "post",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            param: $(this).attr('data-param')
+                        },
+                        dataType: "json",
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: response.success,
+                                    showConfirmButton: false,
+                                    toast: true,
+                                    timer: 1500
+                                })
+                                table.ajax.reload();
+                            } else {
+                                Swal.fire(
+                                    'Ups?',
+                                    response.error,
+                                    'warning'
+                                )
+                            }
+                        }
+                    })
+                }
+            })
+        })
+    </script>
 @endsection

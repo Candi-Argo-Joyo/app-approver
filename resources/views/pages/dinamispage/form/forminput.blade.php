@@ -4,6 +4,34 @@
     <link rel="stylesheet" href="{{ asset('dist/css/custom.css') }}">
     <script src="https://cdn.tiny.cloud/1/bx37734n27j3z8dfd0nytnxe3jmv18nlkh47fvwbbchlow82/tinymce/6/tinymce.min.js"
         referrerpolicy="origin"></script>
+    <link rel="stylesheet" href="{{ asset('assets/select2/css/select2.css') }}">
+    <style>
+        .select2-container--default .select2-selection--single {
+            background-color: unset;
+            padding: 6px 12px;
+        }
+
+        .select2-container .select2-selection--single {
+            height: unset;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 37px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: unset;
+        }
+
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #e9ecef;
+        }
+
+        .is-invalid .select2-selection,
+        .needs-validation~span>.select2-dropdown {
+            border-color: var(--bs-danger) !important;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -49,12 +77,38 @@
         <!-- End Top Leader Table -->
     </div>
     <!--End Container fluid  -->
+    <div id="items" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="itemsLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="itemsLabel">Choose Items</h4>
+                    <button type="button" class="btn-close close_item" data-bs-dismiss="modal" aria-hidden="true"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" name="">
+                    <div class="form-group">
+                        <label class="form-label" for="form-name">Select Item</label>
+                        <select name="item" id="item" class="form-control">
+                            <option value="">--Select Item--</option>
+                        </select>
+                        <div id="invalid-item" class="invalid-feedback">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light close_item" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary submit-item">Apply</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
 @endsection
 @section('script')
+    <script src="{{ asset('assets/select2/js/select2.js') }}"></script>
     <script>
         tinymce.init({
             selector: 'textarea',
-            plugins: 'anchor autolink charmap codesample lists table casechange formatpainter permanentpen powerpaste advtable advcode autocorrect typography inlinecss',
+            plugins: 'charmap codesample lists table',
             toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | removeformat',
             tinycomments_mode: 'embedded',
             tinycomments_author: 'Author name',
@@ -68,6 +122,12 @@
                 },
             ]
         });
+
+        $('#item').select2({
+            width: '100%',
+            dropdownParent: $("#items"),
+        })
+
 
         $('#form-input').on('submit', function(e) {
             e.preventDefault();
@@ -109,6 +169,51 @@
                     }
                 }
             })
+        })
+
+        let table_item = ''
+        $(document).on('click', '.add-item', function() {
+            table_item = $(this).attr('data-id-table')
+            $.ajax({
+                url: "{{ route('pages.items') }}",
+                type: "post",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    group: $(this).attr('data-group')
+                },
+                dataType: "json",
+                success: function(response) {
+                    if (response.success) {
+                        $('#item').html(`<option value="">--Select Item--</option>`)
+                        for (let index = 0; index < response.success.data.length; index++) {
+                            $('#item').append(
+                                `<option value="${response.success.data.id}">${response.success.data[index].name}</option>`
+                            )
+                        }
+                        $('#items').modal('show')
+                    } else {
+                        Swal.fire(
+                            'Ups?',
+                            response.error.msg,
+                            'question'
+                        )
+                    }
+                }
+            })
+        })
+
+        $('.submit-item').on('click', function() {
+            let row = `<tr>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>1</td>
+                    </tr>`
+            // $(`#${table_item} tbody`).html('')
+            $(`#${table_item} tbody`).append(row)
+            console.log(table_item)
         })
     </script>
 @endsection

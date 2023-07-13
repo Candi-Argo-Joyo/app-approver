@@ -38,7 +38,8 @@ class MailSetting extends Controller
             ['NAME' => "MAIL_PORT", 'VALUE' => env('MAIL_PORT') == null ? 'null' : env('MAIL_PORT')],
             ['NAME' => "MAIL_USERNAME", 'VALUE' => env('MAIL_USERNAME') == null ? 'null' : env('MAIL_USERNAME')],
             ['NAME' => "MAIL_PASSWORD", 'VALUE' => env('MAIL_PASSWORD') == null ? 'null' : env('MAIL_PASSWORD')],
-            ['NAME' => "MAIL_ENCRYPTION", 'VALUE' => env('MAIL_ENCRYPTION') == null ? 'null' : env('MAIL_ENCRYPTION')]
+            ['NAME' => "MAIL_ENCRYPTION", 'VALUE' => env('MAIL_ENCRYPTION') == null ? 'null' : env('MAIL_ENCRYPTION')],
+            ['NAME' => "MAIL_FROM_ADDRESS", 'VALUE' => env('MAIL_FROM_ADDRESS') == null ? 'null' : env('MAIL_FROM_ADDRESS')]
         ];
 
         $newEnv = [
@@ -47,7 +48,8 @@ class MailSetting extends Controller
             ['NAME' => "MAIL_PORT", 'VALUE' => $request->port == '' ? 'null' : ($request->port == 'null' ? 'null' : $request->port)],
             ['NAME' => "MAIL_USERNAME", 'VALUE' => $request->username == '' ? 'null' : ($request->username == 'null' ? 'null' : $request->username)],
             ['NAME' => "MAIL_PASSWORD", 'VALUE' => $request->password == '' ? 'null' : ($request->password == 'null' ? 'null' : $request->password)],
-            ['NAME' => "MAIL_ENCRYPTION", 'VALUE' => $request->encryption == '' ? 'null' : ($request->encryption == 'null' ? 'null' : $request->encryption)]
+            ['NAME' => "MAIL_ENCRYPTION", 'VALUE' => $request->encryption == '' ? 'null' : ($request->encryption == 'null' ? 'null' : $request->encryption)],
+            ['NAME' => "MAIL_FROM_ADDRESS", 'VALUE' => $request->username == '' ? 'null' : ($request->username == 'null' ? 'null' : $request->username)]
         ];
 
         if (file_exists($path)) {
@@ -68,14 +70,14 @@ class MailSetting extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function testMail(Request $request)
+    public function sendMail(Request $request)
     {
-        FacadesMail::to('receiver-email-id')->send(new NotifyMail());
+        FacadesMail::to('hanzcreative1@gmail.com')->send(new NotifyMail());
 
         if (FacadesMail::failures()) {
-            return response()->Fail('Sorry! Please try again latter');
+            return response()->json(['error' => 'Sorry! Please try again latter']);
         } else {
-            return response()->success('Great! Successfully send in your mail');
+            return response()->json(['success' => 'Great! Successfully send in your mail']);
         }
     }
 }

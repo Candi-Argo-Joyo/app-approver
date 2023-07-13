@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Helpers\FormBuilder as HelpersFormBuilder;
 use App\Helpers\LogActivity;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -21,20 +20,6 @@ class FormBuilder extends Controller
         return view('pages/formbuilder/index', $data);
     }
 
-    public function addValidation(Request $request)
-    {
-        $length = $request->validation_length;
-        $users = User::where('is_mapping', 'true')->whereIn('role', ['manager', 'validator', 'user'])->get();
-
-        $select = '';
-        foreach ($users as $user) {
-            $select .= '<option value="' . $user->id . '">' . $user->name . ' [' . $user->jabatan_name . ']</option>';
-        }
-
-        $html = HelpersFormBuilder::htmlValidation($length, $select);
-        return response()->json(['html' => $html]);
-    }
-
     public function add(Request $request)
     {
         LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
@@ -49,29 +34,13 @@ class FormBuilder extends Controller
             'report' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['selected_report'] : '',
             'user' => isset($request->form) ? DB::table('users')->where('role', 'manager')->where('is_mapping', 'true')->get() : '',
             'approver' => isset($request->form) ? DB::table('menu')->where('id_html_form', $request->form)->where('page', 'Approver')->get() : '',
-            // 'selected_approver' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['selected_approver'] : '',
-            // 'selected_validator' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['selected_validator'] : '',
-            // 'menu_validator' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['menu_selected_validator'] : '',
+            'selected_approver' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['selected_approver'] : '',
+            'selected_validator' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['selected_validator'] : '',
+            'menu_validator' => isset($request->form) ? HelpersFormBuilder::dataAdd($request)['menu_selected_validator'] : '',
             'group_item' => DB::table('group_item')->get()
         ];
 
         return view('pages/formbuilder/addform', $data);
-    }
-
-    public function getReportApproval(Request $request)
-    {
-        $report = DB::table('menu')->where('id_html_form', $request->param_html)->where('parent', $request->parent)->where('page', 'Report')->first();
-        $approver = DB::table('menu')->where('id_html_form', $request->param_html)->where('parent', $request->parent)->where('page', 'Approver')->first();
-
-        if ($report || $approver) {
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'report' => $report,
-                    'approver' => $approver
-                ]
-            ]);
-        }
     }
 
     public function createForm(Request $request)
@@ -139,27 +108,89 @@ class FormBuilder extends Controller
         // var_dump($request);
         // exit;
         if (isset($request->html_preview)) {
+            $prev = $request->html_preview;
+            $html_preview = '';
+            for ($i = 0; $i < count($request->html_preview); $i++) {
+                $html_preview .= $prev[$i];
+            }
 
             // untuk mengecek apakah ada yang sama dengan value
-            $validator = Validator::make(
-                $request->all(),
-                [
-                    'set_page' => 'required|exists:menu,id',
-                    'report_page' => 'required|exists:menu,id',
-                    'approver_page' => 'required|exists:menu,id',
-                ]
-            );
+            $approver_name = $request->approver_name;
+            $approver_user = $request->approver_user;
+            $page_approver = $request->page_approver;
+            $val_approver_name = '';
+            $val_approver_user = '';
+            $val_page_approver = '';
+            $val_page_approver_error = [
+                'status_error' => 'false',
+                'page' => '',
+                'report' => '',
+                'name_validator' => [],
+                'page_validator' => [],
+                'name_approver' => [],
+                'page_approver' => [],
+            ];
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'error' => $validator->errors()
+            if ($request->set_page == '') {
+                $val_page_approver_error['page'] = 'Entry page cannot be empty';
+                $val_page_approver_error['status_error'] = 'true';
+            }
+
+            if ($request->report_page == '') {
+                $val_page_approver_error['report'] = 'Report page cannot be empty';
+                $val_page_approver_error['status_error'] = 'true';
+            }
+
+            // mengecek value nama approver
+            for ($i = 0; $i < count($request->approver_name); $i++) {
+                if ($approver_name[$i] == '') {
+                    array_push($val_page_approver_error['name_approver'], ['value_empty' => 'Name approver cannot be empty']);
+                    $val_page_approver_error['status_error'] = 'true';
+                } else {
+                    if ($val_approver_name == $approver_name[$i] && $approver_name[$i] != '') {
+                        array_push($val_page_approver_error['name_approver'], ['same_value' => 'Name approver cannot be the same']);
+                        $val_page_approver_error['status_error'] = 'true';
+                    }
+                }
+
+                if ($approver_name[$i] != '') {
+                    $val_approver_name = $approver_name[$i];
+                }
+            }
+
+            // mengecek value page approver
+            for ($i = 0; $i < count($request->page_approver); $i++) {
+                if ($page_approver[$i] == '') {
+                    array_push($val_page_approver_error['page_approver'], ['value_empty' => 'Page approver cannot be empty']);
+                    $val_page_approver_error['status_error'] = 'true';
+                } else {
+                    if ($val_page_approver == $page_approver[$i] && $page_approver[$i] != '') {
+                        array_push($val_page_approver_error['page_approver'], ['same_value' => 'Page approver cannot be the same']);
+                        $val_page_approver_error['status_error'] = 'true';
+                    }
+                }
+
+                if ($page_approver[$i] != '') {
+                    $val_page_approver = $page_approver[$i];
+                }
+            }
+
+            if ($request->validator_name == '') {
+                array_push($val_page_approver_error['name_validator'], ['value_empty' => 'Name validator cannot be empty']);
+                $val_page_approver_error['status_error'] = 'true';
+            }
+
+            if ($request->page_validator == '') {
+                array_push($val_page_approver_error['page_validator'], ['value_empty' => 'Page validator cannot be empty']);
+                $val_page_approver_error['status_error'] = 'true';
+            }
+
+            if ($val_page_approver_error['status_error'] == 'true') {
+                return json_encode([
+                    'error' => $val_page_approver_error
                 ]);
             }
-            //    
 
-            LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
-
-            // mengaktifkan page menu berdasarkan form builder baru
             DB::table('menu')->where('id', $request->set_page)->update([
                 'id_html_form' => $request->param_html,
                 'is_use' => 'yes'
@@ -170,17 +201,89 @@ class FormBuilder extends Controller
                 'is_use' => 'yes'
             ]);
 
-            DB::table('menu')->where('id', $request->approver_page)->update([
+            DB::table('menu')->where('id', $request->page_validator)->update([
                 'id_html_form' => $request->param_html,
                 'is_use' => 'yes'
             ]);
 
-            // save html
-            $prev = $request->html_preview;
-            $html_preview = '';
-            for ($i = 0; $i < count($request->html_preview); $i++) {
-                $html_preview .= $prev[$i];
+            if ($request->id_validator != '') {
+                $data_validator = DB::table('menu')->where('id', $request->page_validator)->first();
+                DB::table('approver_for_form')->where('id', $request->id_validator)->update([
+                    'id_html_form' => $request->param_html,
+                    'id_user_approver' => $data_validator->id_user_approver,
+                    'id_menu' => $data_validator->id,
+                    'name' => $request->validator_name,
+                    'type' => 'Validator',
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            } else {
+                $data_validator = DB::table('menu')->where('id', $request->page_validator)->first();
+                DB::table('approver_for_form')->insert([
+                    'id_html_form' => $request->param_html,
+                    'id_user_approver' => $data_validator->id_user_approver,
+                    'id_menu' => $data_validator->id,
+                    'name' => $request->validator_name,
+                    'type' => 'Validator',
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
             }
+
+            if (isset($request->id_approver)) {
+                $id_approver = $request->id_approver;
+                for ($i = 0; $i < count($request->id_approver); $i++) {
+                    DB::table('approver_for_form')->where('id', $id_approver[$i])->delete();
+                }
+
+                for ($i = 0; $i < count($request->page_approver); $i++) {
+                    $user = DB::table('menu')->where('id', $page_approver[$i])->first();
+                    DB::table('menu')->where('id', $page_approver[$i])->update([
+                        'id_html_form' => $request->param_html,
+                        'is_use' => 'yes'
+                    ]);
+
+                    DB::table('approver_for_form')->insert([
+                        'id_html_form' => $request->param_html,
+                        'id_user_approver' => $user->id_user_approver,
+                        'id_menu' => $page_approver[$i],
+                        'name' => $approver_name[$i],
+                        'type' => 'Approver',
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+            } else {
+                for ($i = 0; $i < count($request->page_approver); $i++) {
+                    $user = DB::table('menu')->where('id', $page_approver[$i])->first();
+                    DB::table('menu')->where('id', $page_approver[$i])->update([
+                        'id_html_form' => $request->param_html,
+                        'is_use' => 'yes'
+                    ]);
+
+                    DB::table('approver_for_form')->insert([
+                        'id_html_form' => $request->param_html,
+                        'id_user_approver' => $user->id_user_approver,
+                        'id_menu' => $page_approver[$i],
+                        'name' => $approver_name[$i],
+                        'type' => 'Approver',
+                        'created_at' => date('Y-m-d H:i:s')
+                    ]);
+                }
+            }
+
+            if (isset($request->delete_approver)) {
+                $id_delete_approver = explode(',', $request->delete_approver);
+                for ($i = 0; $i < count($id_delete_approver); $i++) {
+                    $dataMenu = DB::table('approver_for_form')->where('id', $id_delete_approver[$i])->first();
+                    DB::table('menu')->where('id', $dataMenu->id_menu)->update([
+                        'id_html_form' => NULL,
+                        'id_user_approver' => NULL,
+                        'is_use' => 'no'
+                    ]);
+
+                    DB::table('approver_for_form')->where('id', $id_delete_approver[$i])->delete();
+                }
+            }
+
+            LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
 
             $data = [
                 'form_name' => $request->form_name,
@@ -205,6 +308,9 @@ class FormBuilder extends Controller
             LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
             DB::table('menu')->where('id_html_form', $request->param)->update([
                 'id_html_form' => NULL,
+                // 'name_parent' => NULL,
+                // 'page' => NULL,
+                // 'status' => 'non-active',s
                 'is_use' => 'no'
             ]);
 
@@ -405,7 +511,26 @@ class FormBuilder extends Controller
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
 
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), NULL, NULL);
+                $html = '<div class="d-flex flex-row justify-content-between gap-2 mb-3" data-field-label id="title-' . $urutanField . '">
+                            <div class="w-100">
+                                <input data-label-input id-field="' . $idField . '" has-change="false" data-name="label-title-field-' . $urutanField . '" data-label-title data-title="true"
+                                    type="text" value="Your title here ' . $urutanField . '" class="no-border w-100 input-title" data-type="title"
+                                    id="label-title-field-' . $urutanField . '" hidden>
+                                <label data-field-label has-change="false" data-target="label-title-field-' . $urutanField . '" class="h5">Your title here ' . $urutanField . '</label>
+                            </div>
+                            <div>
+                                <div class="d-flex gap-2 mb-2" data-action>
+                                    <a href="javascript:void(0)" class="badge bg-warning" x-edit data-type="title" data-edit-title
+                                        data-name="label-title-field-' . $urutanField . '">
+                                        edit
+                                    </a>
+                                    <a href="javascript:void(0)" class="badge bg-danger del-fileld" data-delete-title
+                                        id-field="' . $idField . '" data-target-delete="#title-' . $urutanField . '" data-type="title">
+                                        delete
+                                    </a>
+                                </div>
+                            </div>
+                        </div>';
                 break;
             case 'text':
                 $idField = DB::table('form_field')->insertGetId([
@@ -417,7 +542,24 @@ class FormBuilder extends Controller
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
 
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), NULL, NULL);
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray mb-3" data-field-text id="text-' . $urutanField . '" data-css>
+                            <div class="d-flex flex-row justify-content-end gap-2 mb-2" data-action>
+                                <a href="javascript:void(0)" class="badge bg-warning" x-edit data-edit-text data-name="label-text-field-' . $urutanField . '">
+                                    edit
+                                </a>
+                                <a href="javascript:void(0)" id-field="' . $idField . '" class="badge bg-danger del-fileld" data-delete-text data-target-delete="#text-' . $urutanField . '" data-type="text">
+                                    delete
+                                </a>
+                            </div>
+                            <div class="row justify-items-center">
+                                <div class="col-sm-3 col-form-label">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-text type="text" has-change="false" value="Text Field ' . $urutanField . '" data-target-input="#text-field-' . $urutanField . '" class="no-border w-100" id="label-text-field-' . $urutanField . '" readonly="true">
+                                </div>
+                                <div class="col-sm-9">
+                                    <input data-filed data-text class="form-control input-text" has-change="false" placeholder="Input Text Here..." type="text" name="text-field-' . $urutanField . '" id="text-field-' . $urutanField . '">
+                                </div>
+                            </div> 
+                        </div>';
                 break;
             case 'number':
                 $idField = DB::table('form_field')->insertGetId([
@@ -429,7 +571,24 @@ class FormBuilder extends Controller
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
 
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), NULL, NULL);
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray mb-3" data-field-number id="number-' . $urutanField . '" data-css>
+                            <div class="d-flex flex-row justify-content-end gap-2 mb-2" data-action>
+                                <a href="javascript:void(0)" class="badge bg-warning" x-edit data-edit-number data-name="label-number-field-' . $urutanField . '">
+                                    edit
+                                </a>
+                                <a href="javascript:void(0)" id-field="' . $idField . '" class="badge bg-danger del-fileld" data-delete-number data-target-delete="#number-' . $urutanField . '" data-type="number">
+                                    delete
+                                </a>
+                            </div>
+                            <div class="row justify-items-center">
+                                <div class="col-sm-3 col-form-label">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-number type="text" has-change="false" value="number Field ' . $urutanField . '" data-target-input="#number-field-' . $urutanField . '" class="no-border w-100" id="label-number-field-' . $urutanField . '" readonly="true">
+                                </div>
+                                <div class="col-sm-9">
+                                    <input data-filed data-number class="form-control input-number" has-change="false" placeholder="Input number Here..." type="number" name="number-field-' . $urutanField . '" id="number-field-' . $urutanField . '">
+                                </div>
+                            </div> 
+                        </div>';
                 break;
             case 'date':
                 $idField = DB::table('form_field')->insertGetId([
@@ -441,7 +600,24 @@ class FormBuilder extends Controller
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
 
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), NULL, NULL);
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray mb-3" data-field-date id="date-' . $urutanField . '" data-css>
+                            <div class="d-flex flex-row justify-content-end gap-2 mb-2" data-action>
+                                <a href="javascript:void(0)" class="badge bg-warning" x-edit data-edit-date data-name="label-date-field-' . $urutanField . '">
+                                    edit
+                                </a>
+                                <a href="javascript:void(0)" id-field="' . $idField . '" class="badge bg-danger del-fileld" data-delete-date data-target-delete="#date-' . $urutanField . '" data-type="date">
+                                    delete
+                                </a>
+                            </div>
+                            <div class="row justify-items-center">
+                                <div class="col-sm-3 col-form-label">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-date type="text" has-change="false" value="Date Field ' . $urutanField . '" data-target-input="#date-field-' . $urutanField . '" class="no-border w-100" id="label-date-field-' . $urutanField . '" readonly="true">
+                                </div>
+                                <div class="col-sm-9">
+                                    <input data-filed data-date class="form-control input-date" type="date" has-change="false" name="date-field-' . $urutanField . '" id="date-field-' . $urutanField . '">
+                                </div>
+                            </div> 
+                        </div>';
                 break;
             case 'file upload':
                 $idField = DB::table('form_field')->insertGetId([
@@ -453,7 +629,24 @@ class FormBuilder extends Controller
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
 
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), NULL, NULL);
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray mb-3" data-field-file id="file-' . $urutanField . '" data-css>
+                            <div class="d-flex flex-row justify-content-end gap-2 mb-2" data-action>
+                                <a href="javascript:void(0)" class="badge bg-warning" x-edit data-edit-file data-name="label-file-field-' . $urutanField . '">
+                                    edit
+                                </a>
+                                <a href="javascript:void(0)" id-field="' . $idField . '" class="badge bg-danger del-fileld" data-delete-file data-target-delete="#file-' . $urutanField . '" data-type="file">
+                                    delete
+                                </a>
+                            </div>           
+                            <div class="row justify-items-center">
+                                <div class="col-sm-3 col-form-label">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-file type="text" has-change="false" value="File Field ' . $urutanField . '" data-target-input="#file-field-' . $urutanField . '" class="no-border w-100" id="label-file-field-' . $urutanField . '" readonly="true">
+                                </div>
+                                <div class="col-sm-9">
+                                    <input data-filed data-file class="form-control input-file" type="file" has-change="false" name="file-field-' . $urutanField . '" id="file-field-' . $urutanField . '">
+                                </div>
+                            </div> 
+                         </div>';
                 break;
             case 'textarea':
                 $idField = DB::table('form_field')->insertGetId([
@@ -465,7 +658,24 @@ class FormBuilder extends Controller
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
 
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), NULL, NULL);
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray mb-3" data-field-textarea id="textarea-' . $urutanField . '" data-css>
+                            <div class="d-flex flex-row justify-content-end gap-2 mb-2" data-action>
+                                <a href="javascript:void(0)" class="badge bg-warning" x-edit data-edit-textarea data-name="label-textarea-field-' . $urutanField . '">
+                                    edit
+                                </a>
+                                <a href="javascript:void(0)" id-field="' . $idField . '" class="badge bg-danger del-fileld" data-delete-textarea data-no=' . $urutanField . ' data-target-delete="#textarea-' . $urutanField . '" data-type="textarea">
+                                    delete
+                                </a>
+                            </div>           
+                            <div class="row justify-items-center">
+                               <div class="col-sm-3 col-form-label">
+                                   <input name="label[]" data-label-input id-field="' . $idField . '" data-label-textarea type="text" has-change="false" value="Textarea Field ' . $urutanField . '" data-target-input="#textarea-field-' . $urutanField . '" class="no-border w-100" id="label-textarea-field-' . $urutanField . '" readonly="true">
+                               </div>
+                               <div class="col-sm-9">
+                                    <textarea data-filed data-textarea class="form-control input-textarea" has-change="false" name="textarea-field-' . $urutanField . '" id="textarea-field-' . $urutanField . '"></textarea>
+                               </div>
+                            </div> 
+                         </div>';
                 break;
             case 'select-option':
                 $idField = DB::table('form_field')->insertGetId([
@@ -489,7 +699,29 @@ class FormBuilder extends Controller
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
 
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), NULL, NULL);
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray mb-3" data-field-select id="select-option-' . $urutanField . '" data-css>
+                            <div class="d-flex flex-row justify-content-end gap-2 mb-2" data-action>
+                                <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#opsi-select-option" class="badge bg-primary" x-setting data-setting-select data-name="label-select-field-' . $urutanField . '" data-option-group="' . $id_select . '" data-target-input="#select-option-field-' . $urutanField . '">
+                                    setting
+                                </a>
+                                <a href="javascript:void(0)" class="badge bg-warning" x-edit data-edit-select data-name="label-select-field-' . $urutanField . '" data-layout="layout-' . $urutanLayout . '" data-section="section-' . $urutanSection . '">
+                                    edit
+                                </a>
+                                <a href="javascript:void(0)" id-field="' . $idField . '" class="badge bg-danger del-fileld" data-delete-select data-target-label="#label-select-field-' . $urutanField . '" data-target-delete="#select-option-' . $urutanField . '" data-type="select" data-option-group="' . $id_select . '">
+                                    delete
+                                </a>
+                            </div>           
+                            <div class="row justify-items-center">
+                               <div class="col-sm-3 col-form-label">
+                                    <input name="label[]" data-label-input id-field="' . $idField . '" data-label-select type="text" has-change="false" value="Select Field ' . $urutanField . '" data-target-input="#select-option-field-' . $urutanField . '" class="no-border w-100" id="label-select-field-' . $urutanField . '" readonly="true">
+                               </div>
+                               <div class="col-sm-9">
+                                    <select data-filed select-option class="form-control select-option" has-change="false" name="select-option-field-' . $urutanField . '" id="select-option-field-' . $urutanField . '">
+                                            <option>--Pilih--</option>
+                                    </select>
+                               </div> 
+                            </div> 
+                        </div>';
                 break;
             case 'radio-button':
                 $idField = DB::table('form_field')->insertGetId([
@@ -512,7 +744,38 @@ class FormBuilder extends Controller
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
 
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), $id_radio, NULL);
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray mb-3"
+                            id="radio-' . $urutanField . '" data-radio>
+                            <div class="d-flex flex-row justify-content-end gap-2 mb-2" data-action>
+                                <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#radio"
+                                    class="badge bg-primary" x-radio data-setting-radio data-name="label-radio-field-' . $urutanField . '"
+                                    data-radio-group="' . $id_radio . '" data-target-input="#radio-append-' . $urutanField . '">
+                                    setting
+                                </a>
+                                <a href="javascript:void(0)" class="badge bg-warning" x-edit data-edit-radio data-type="radio"
+                                    data-name="label-radio-field-' . $urutanField . '">
+                                    edit
+                                </a>
+                                <a href="javascript:void(0)" class="badge bg-danger del-fileld" data-delete-radio
+                                    id-field="' . $idField . '" data-target-delete="#radio-' . $urutanField . '" data-type="radio">
+                                    delete
+                                </a>
+                            </div>
+                            <h5 class="card-title" has-change="false" data-is-label-radio data-label-radio="label-radio-field-' . $urutanField . '">Default Radio
+                                Buttons ' . $urutanField . '</h5>
+                            <input name="label[]" data-label-input id-field="' . $idField . '" data-label-radio has-change="false" type="text"
+                                data-name="label-radio-field-' . $urutanField . '" id="label-radio-field-' . $urutanField . '" value="Default Radio Buttons ' . $urutanField . '"
+                                class="no-border radio-button" data-type="radio" hidden>
+                            <div data-radio-append id="radio-append-' . $urutanField . '">
+                                <fieldset class="radio">
+                                    <label>
+                                        <input type="radio" has-change="false" data-name-radio="label-radio-field-' . $urutanField . '" name="default-radio-buttons-' . $urutanField . '"
+                                            value="Radio Button">
+                                        Radio Button
+                                    </label>
+                                </fieldset>
+                            </div>
+                        </div>';
                 break;
             case 'check-box':
                 $idField = DB::table('form_field')->insertGetId([
@@ -524,7 +787,31 @@ class FormBuilder extends Controller
                     'created_at' => date('Y-m-d H:i:s')
                 ]);
 
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), NULL, NULL);
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray mb-3"
+                            data-field-checkbox id="checkbox-' . $urutanField . '" data-css>
+                            <div class="d-flex flex-row justify-content-end gap-2 mb-2" data-action>
+                                <a href="javascript:void(0)" class="badge bg-warning" x-edit data-edit-checkbox
+                                    data-type="checkbox" data-name="label-checkbox-field-' . $urutanField . '">
+                                    edit
+                                </a>
+                                <a href="javascript:void(0)" class="badge bg-danger del-fileld" data-delete-checkbox
+                                    id-field="' . $idField . '" data-target-delete="#checkbox-' . $urutanField . '" data-type="checkbox">
+                                    delete
+                                </a>
+                            </div>
+                            <div>
+                                <fieldset class="checkbox">
+                                    <label class="w-100">
+                                        <input type="checkbox" data-checkbox-indicator has-change="false" data-id="label-checkbox-field-' . $urutanField . '"
+                                            name="checkbox-' . $urutanField . '" value="i am unchecked Checkbox ' . $urutanField . '">
+                                        <span class="ms-3" data-label-checkbox has-change="false" data-target="label-checkbox-field-' . $urutanField . '">i am unchecked Checkbox ' . $urutanField . '</span>
+                                        <input name="label[]" type="text" id="label-checkbox-field-' . $urutanField . '" data-label-input data-checkbox
+                                            data-type="checkbox" data-name="label-checkbox-field-' . $urutanField . '" has-change="false"
+                                            value="i am unchecked Checkbox ' . $urutanField . '" class="no-border border-bottom w-100" hidden>
+                                    </label>
+                                </fieldset>
+                            </div>
+                        </div>';
                 break;
 
             case 'item';
@@ -538,7 +825,52 @@ class FormBuilder extends Controller
                 ]);
 
                 $id_group = $request->groupItems;
-                $html = HelpersFormBuilder::htmlField(NULL, NULL, NULL, $urutanField, $idField, $request->input('type'), NULL, $id_group);
+                $html = '<div class="border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray item mb-3"
+                            data-field-text id="item-' . $urutanField . '" data-css>
+                            <div class="d-flex justify-content-end">
+                                <div class="d-flex gap-2 mb-2" data-action>
+                                    <a href="javascript:void(0)" class="badge bg-warning" x-edit data-type="item"
+                                        data-edit-title data-name="label-item-' . $urutanField . '">
+                                        edit
+                                    </a>
+                                    <a href="javascript:void(0)" class="badge bg-danger del-fileld" data-delete-title
+                                        id-field="' . $idField . '" data-target-delete="#item-' . $urutanField . '" data-type="item">
+                                        delete
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-item-between gap-2 mb-3">
+                                <input name="label[]" data-label-input id-field="' . $idField . '" name-item data-name="item-' . $urutanField . '" data-type="item" has-change="false"
+                                    value="Data pengajuan pembelian barang" class="no-border w-100" id="label-item-' . $urutanField . '"
+                                    readonly="true">
+                                <div>
+                                    <a href="javascript:void(0)" class="badge bg-primary text-nowrap add-item" data-group="' . $id_group . '" data-id-table="item-' . $urutanField . '">
+                                        Add Item
+                                    </a>
+                                </div>
+                            </div>
+                            <table class="table border table-striped table-bordered text-nowrap mb-0" id="item-' . $urutanField . '">
+                                <thead>
+                                    <tr>
+                                        <td style="width:15px;">No</td>
+                                        <td style="min-width:115px;">Item</td>
+                                        <td style="width:15px;">Qty</td>
+                                        <td>Price</td>
+                                        <td>Total Amount</td>
+                                        <td style="width:15px;">Action</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="rm">
+                                        <td colspan="6" class="text-center">No items selected</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5" class="text-end">Total :</td>
+                                        <td>0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>';
         }
 
         $data = [
@@ -793,167 +1125,47 @@ class FormBuilder extends Controller
     public function settingGetfield(Request $request)
     {
         $validate_field = DB::table('form_field')->where('id_html_form', $request->param)->where('type', 'number')->get();
-        if (!$validate_field) {
-            return response()->json([
-                'error' => ['msg' => 'Field type number not found']
-            ]);
-        }
-
-        $cek_exist_validation = DB::table('validation_group')->where('id_html_form', $request->param)->first();
-        if ($cek_exist_validation) {
-            $users = User::where('is_mapping', 'true')->whereIn('role', ['manager', 'validator', 'user'])->get();
-            $data_validation = DB::table('validation')->where('id_validation_group', $cek_exist_validation->id)->get();
-
+        if ($validate_field) {
             return response()->json([
                 'success' => [
-                    'exist_validation' => [
-                        'html' => HelpersFormBuilder::existValidation($users, $data_validation),
-                        'selected_field' => $cek_exist_validation->id_form_field
-                    ],
-                    'field' => $validate_field
+                    'field' => $validate_field,
+                    'approval' => DB::table('approver_for_form')->where('id_html_form', $request->param)->get(),
+                    'selected_field' => DB::table('approver_for_form')->whereNotNull('id_form_field')->where('id_html_form', $request->param)->first()
                 ]
             ]);
         }
 
         return response()->json([
-            'success' => [
-                'field' => $validate_field
-            ]
+            'error' => ['msg' => 'Field type number not found']
         ]);
     }
 
     public function settingSaveApprover(Request $request)
     {
-        $group = $request->group;
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'field' => 'required',
+                'amount' => 'required',
+                'comparison' => 'required',
+                'approval' => 'required',
+            ]
+        );
 
-        $validate = [];
-        $step = '';
-        $user = '';
-
-        if (!$request->group) {
-            array_push(
-                $validate,
-                ['condition' => 'Conditional form cannot be empty']
-            );
-
+        if ($validator->fails()) {
             return response()->json([
-                'error' => $validate
+                'error' => $validator->errors()
             ]);
         }
 
-        if (!$request->simultan) {
-            array_push(
-                $validate,
-                ['simultan' => 'Simultan tidak boleh kosong']
-            );
-
-            return response()->json([
-                'error' => $validate
-            ]);
-        }
-
-        for ($i = 0; $i < count($group); $i++) {
-            $count = count($request->input("step_$group[$i]"));
-            for ($j = 0; $j < $count; $j++) {
-                if ($request->input("step_$group[$i]")[$j] == $step) {
-                    array_push(
-                        $validate,
-                        ['step' => 'Step tidak boleh sama']
-                    );
-                }
-
-                if ($request->input("step_$group[$i]")[$j] == '') {
-                    array_push(
-                        $validate,
-                        ['step' => 'Step tidak boleh kosong']
-                    );
-                }
-
-                if ($request->input("name_$group[$i]")[$j] == '') {
-                    array_push(
-                        $validate,
-                        ['name' => 'Name tidak boleh kosong']
-                    );
-                }
-
-
-                // if ($request->input("select_required_$group[$i]")[$j] == '') {
-                //     array_push(
-                //         $validate,
-                //         ['required' => 'Required tidak boleh kosong']
-                //     );
-                // }
-
-                $cek_user = DB::table('users')->where('id', $request->input('select_' . $group[$i])[$j])->first();
-                if (!$cek_user) {
-                    array_push(
-                        $validate,
-                        ['user' => 'User tidak ditemukan']
-                    );
-                }
-
-                if ($request->input("select_$group[$i]")[$j] == $user) {
-                    array_push(
-                        $validate,
-                        ['user' => 'User tidak boleh sama']
-                    );
-                }
-
-                if ($request->input("select_$group[$i]")[$j] == '') {
-                    array_push(
-                        $validate,
-                        ['user' => 'User tidak boleh kosong']
-                    );
-                }
-
-                $step = $request->input("step_$group[$i]")[$j];
-                $user = $request->input("select_$group[$i]")[$j];
-            }
-        }
-
-        if (count($validate) != 0) {
-            return response()->json([
-                'error' => $validate
-            ]);
-        }
-
-        // return response()->json([
-        //     'success' => 'ok'
-        // ]);
-
-        $cek_exist_validation = DB::table('validation_group')->where('id_html_form', $request->form_id)->first();
-        if ($cek_exist_validation) {
-            DB::table('validation_group')->where('id_html_form', $request->form_id)->delete();
-            DB::table('validation')->where('id_validation_group', $cek_exist_validation->id)->delete();
-        }
-
-        for ($i = 0; $i < count($group); $i++) {
-            $id = DB::table('validation_group')->insertGetId([
-                'id_html_form' => $request->form_id,
-                'id_form_field' => $request->field,
-                'simultan' => $request->simultan,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ]);
-
-            $count = count($request->input("step_$group[$i]"));
-            for ($j = 0; $j < $count; $j++) {
-                $cek_user = DB::table('users')->where('id', $request->input('select_' . $group[$i])[$j])->first();
-                DB::table('validation')->insert([
-                    'id_html_form' => $request->form_id,
-                    'id_validation_group' => $id,
-                    'id_user' => $request->input('select_' . $group[$i])[$j],
-                    'step' => $request->input('step_' . $group[$i])[$j],
-                    'name' => $request->input('name_' . $group[$i])[$j],
-                    // 'required' => $request->input('select_required_' . $group[$i])[$j] == 'true' ? 'yes' : 'no',
-                    'name_user' => $cek_user->name,
-                    'more_than' => $request->input('more_than_' . $group[$i])[$j],
-                    'less_than' => $request->input('less_than_' . $group[$i])[$j],
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ]);
-            }
-        }
+        DB::table('approver_for_form')->where('id', $request->approval)->update([
+            'id_form_field' => $request->field,
+            'rule' => 'true',
+            'field_condition' => $request->logic,
+            'condition' => $request->condition,
+            'amount' => $request->amount,
+            'comparison' => $request->comparison,
+        ]);
 
         return response()->json([
             'success' => 'Condition form successfully created'

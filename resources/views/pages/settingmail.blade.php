@@ -80,7 +80,7 @@
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary mt-4">Save Mail</button>
-                        <button type="button" class="btn btn-dark mt-4">Test Send Mail <i
+                        <button type="button" class="btn btn-dark mt-4" id="testmail">Test Send Mail <i
                                 class="fab fa-telegram-plane"></i></button>
                     </form>
                 </div>
@@ -97,12 +97,14 @@
     <script>
         $('#mail-form').on('submit', function(e) {
             e.preventDefault();
+            $(".preloader").fadeIn()
             $.ajax({
                 url: "{{ route('settingmail.save') }}",
                 type: "post",
                 data: $(this).serialize(),
                 dataType: "json",
                 success: function(response) {
+                    $(".preloader").fadeOut()
                     Swal.fire({
                         position: 'top-end',
                         icon: 'success',
@@ -111,6 +113,32 @@
                         toast: true,
                         timer: 1500
                     })
+                }
+            })
+        })
+
+        $('#testmail').on('click', function(e) {
+            e.preventDefault();
+            $(".preloader").fadeIn()
+            $.ajax({
+                url: "{{ route('settingmail.testmail') }}",
+                type: "get",
+                dataType: "json",
+                success: function(response) {
+                    $(".preloader").fadeOut()
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: response.success,
+                            showConfirmButton: true,
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: response.error,
+                            showConfirmButton: true,
+                        })
+                    }
                 }
             })
         })

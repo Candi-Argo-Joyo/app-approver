@@ -1,8 +1,8 @@
 @extends('index')
 @section('title', 'Build Form | Aprover KDDI')
 @section('css')
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/css/custom.css') }}">
 @endsection
 @section('content')
@@ -62,11 +62,14 @@
                                                     class="btn btn-success">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                {{-- @if ($f->status == 'draft') --}}
                                                 <a href="{{ route('formBuilder.add') }}?form={{ $f->id }}"
                                                     class="btn btn-warning">
                                                     <i class="fas fa-pencil-alt"></i>
                                                 </a>
-                                                <a href="javascript:void(0)" class="btn btn-danger">
+                                                {{-- @endif --}}
+                                                <a href="javascript:void(0)" class="btn btn-danger" id="del-form"
+                                                    data-html="{{ $f->id }}">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             </td>
@@ -81,9 +84,29 @@
         </div>
         <!-- End Top Leader Table -->
     </div>
+    <style>
+        .th {
+            padding: 3px;
+            border-top: hidden;
+            border-left: hidden;
+            border-right: hidden;
+        }
+
+        .td1 {
+            padding: 5px;
+            border-left: hidden;
+            border-bottom: hidden;
+        }
+
+        .td2 {
+            padding: 5px;
+            border-right: hidden;
+            border-bottom: hidden;
+        }
+    </style>
     <!--End Container fluid  -->
     <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <form action="" id="conditional-form">
                     @csrf
@@ -92,44 +115,25 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group mb-3">
+                        <input type="text" name="form_id" hidden>
+                        <div class="form-group mb-3 col-md-6">
+                            <label class="form-label"> Simultan</label>
+                            <select name="simultan" id="simultan" class="form-control">
+                                <option value="">--Select--</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3 col-md-6">
                             <label class="form-label" for="name">Select Field to Condition</label>
                             <select name="field" id="field" class="form-control">
                                 <option value="">--Select Field--</option>
                             </select>
                         </div>
-                        <div class="form-group mb-3">
-                            <label class="form-label" for="name">Condition</label>
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <input class="form-control" type="text" id="logic" name="logic"
-                                        placeholder="Division Name" value="if" readonly>
-                                </div>
-                                <div class="col-md-6 p-0">
-                                    <input class="form-control" type="text" id="amount" name="amount"
-                                        placeholder="Amount">
-                                </div>
-                                <div class="col-md-3">
-                                    <select name="comparison" id="comparison" class="form-control text-center">
-                                        <option value="">--Comparison--</option>
-                                        <option value=">"> > </option>
-                                        <option value="<">
-                                            < </option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <input class="form-control" type="text" id="name" name="condition"
-                                        value="must pass" readonly>
-                                </div>
-                                <div class="col-md-9">
-                                    <select name="approval" id="approval" class="form-control">
-                                        <option value="">--Select Approval--</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                        <a href="javascript:void(0)" class="btn btn-secondary w-100 mb-3 add-validation">Add Condition
+                            (+)</a>
+                        <div id="v-append" class="table-responsive"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
@@ -141,9 +145,9 @@
     </div>
 @endsection
 @section('script')
-    <script src="../assets/extra-libs/datatables.net/js/jquery.dataTables.min.js"></script>
-    <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
-    <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
+    <script src="{{ asset('assets/extra-libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('dist/js/pages/datatable/datatable-basic.init.js') }}"></script>
     <script>
         $('.tb-form').DataTable({
             serverSide: false,
@@ -166,6 +170,7 @@
 
         $(document).on('click', '.setting-form', function() {
             let id = $(this).attr('data-form-id')
+            $('input[name="form_id"]').val(id)
             $.ajax({
                 url: "{{ route('formBuilder.settinggetfield') }}",
                 type: "post",
@@ -192,35 +197,97 @@
                             }
                         }
 
-                        $('#approval').html('<option value="">--Select Approval--</option>')
-                        for (let index = 0; index < response.success.approval.length; index++) {
-                            var option = $('<option>', {
-                                text: response.success.approval[index].name,
-                                value: response.success.approval[index].id
-                            })
-
-                            $('#approval').append(option)
-                            if (response.success.selected_field != null) {
-                                if (response.success.approval[index].id == response.success
-                                    .selected_field.id) {
-                                    $(option).prop('selected', true)
-                                }
+                        if (response.success.exist_validation) {
+                            $('.add-validation').hide()
+                            if (response.success.exist_validation.html) {
+                                $('#v-append').html(response.success.exist_validation.html)
                             }
-                        }
 
-                        if (response.success.selected_field != null) {
-                            $('#amount').val(response.success.selected_field.amount)
-
-                            $('select[name="comparison"] option').each(function(e) {
-                                if ($(this).val() == response.success.selected_field
-                                    .comparison) {
-                                    $(this).prop('selected', true)
-                                }
-                            })
+                            if (response.success.exist_validation.selected_field) {
+                                $('#field').val(response.success.exist_validation.selected_field)
+                                    .trigger('change')
+                            }
                         }
                     }
                 }
             })
+        })
+
+        $('.add-validation').on('click', function() {
+            $.ajax({
+                url: "{{ route('formBuilder.addValidation') }}",
+                type: "get",
+                data: {
+                    validation_length: ($('table[validation]').length + 1)
+                },
+                dataType: "json",
+                success: function(response) {
+                    $('#v-append').append(response.html)
+                    $('.add-validation').hide()
+                }
+            })
+        })
+
+        $(document).on('click', '.add-more', function() {
+            let inTable = $(this).attr('data-table')
+            var rowCount = $(`#${inTable} > tbody`).children().length + 1;
+
+            $.ajax({
+                url: "{{ route('users.get') }}",
+                type: "post",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                },
+                dataType: "json",
+                success: function(response) {
+                    let select = ''
+                    for (let index = 0; index < response.data.length; index++) {
+                        select += '<option value="' + response.data[index].id + '">' + response.data[
+                                index].name + ' [' + response.data[index]
+                            .jabatan_name + ']</option>'
+                    }
+
+                    let row = `<tr>
+                                    <td><span id="${inTable}-row">${rowCount}</span></td>
+                                    <td><input td-count-${inTable} type="number" name="step_${inTable}[]" class="form-control bg-white" value="${rowCount}" placeholder="${rowCount}"></td>
+                                    <td><input td-count-${inTable} type="text" name="name_${inTable}[]" class="form-control bg-white"></td>
+                                    <td>
+                                        <select name="select_${inTable}[]" id="" class="form-control bg-white">
+                                            <option value="">--Select User--</option>
+                                            ${select}
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="form-control bg-white" value="0" name="more_than_${inTable}[]"></td>
+                                    <td><input type="text" class="form-control bg-white" value="0" name="less_than_${inTable}[]"></td>
+                                    <td>
+                                        <a href="javascript:;" class="btn btn-danger dell-more" data-table="${inTable}">-</a>
+                                    </td>
+                                </tr>`
+                    $(`#${inTable}`).append(row)
+                }
+            })
+        })
+
+        $(document).on('click', '.dell-more', function() {
+            $(this).closest("tr").remove();
+
+            let inTable = $(this).attr('data-table')
+            $(`span[id="${inTable}-row"]`).each(function(i, obj) {
+                i++
+                $(this).html(i)
+            })
+
+            $(`input[td-count-${inTable}]`).each(function(j) {
+                j++
+                $(this).attr('placeholder', j).val(j)
+            })
+
+        })
+
+        $(document).on('click', '.delete-validation', function() {
+            let validation = $(this).attr('data-table')
+            $(`#${validation}`).remove()
+            $('.add-validation').show()
         })
 
         $('#conditional-form').on('submit', function(e) {
@@ -233,43 +300,39 @@
                 dataType: "json",
                 success: function(response) {
                     $('span[err]').remove()
+                    console.log(response);
 
                     if (response.error) {
-                        $('#field').removeClass('is-invalid')
-                        $('#amount').removeClass('is-invalid')
-                        $('#comparison').removeClass('is-invalid')
-                        $('#approval').removeClass('is-invalid')
-
-                        if (response.error.field) {
-                            $('#field').addClass('is-invalid')
-                            $('#field').parent().append(
-                                '<span err class="invalid-feedback">' + response.error.field +
-                                '</span>'
-                            )
+                        let message = ''
+                        if (response.error[0].condition) {
+                            message = response.error[0].condition
                         }
 
-                        if (response.error.amount) {
-                            $('#amount').addClass('is-invalid')
-                            $('#amount').parent().append(
-                                '<span err class="invalid-feedback">' + response.error.amount +
-                                '</span>')
+                        if (response.error[0].condition_validation) {
+                            message = response.error[0].condition_validation
                         }
 
-                        if (response.error.comparison) {
-                            $('#comparison').addClass('is-invalid')
-                            $('#comparison').parent().append(
-                                '<span err class="invalid-feedback">' + response.error.comparison +
-                                '</span>'
-                            )
+                        if (response.error[0].step) {
+                            message = response.error[0].step
                         }
 
-                        if (response.error.approval) {
-                            $('#approval').addClass('is-invalid')
-                            $('#approval').parent().append(
-                                '<span err class="invalid-feedback">' + response.error.approval +
-                                '</span>'
-                            )
+                        if (response.error[0].required) {
+                            message = response.error[0].required
                         }
+
+                        if (response.error[0].user) {
+                            message = response.error[0].user
+                        }
+
+                        if (response.error[0].name) {
+                            message = response.error[0].name
+                        }
+
+                        Swal.fire(
+                            'Ups?',
+                            message,
+                            'warning'
+                        )
                     } else {
                         Swal.fire({
                             position: 'top-end',
@@ -281,6 +344,28 @@
                         })
                         $('#myModal').modal('hide')
                     }
+                }
+            })
+        })
+
+        $(document).on('click', '#del-form', function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('formBuilder.delform') }}?param= " + $(this).attr(
+                            'data-html'),
+                        type: "get",
+                        async: false
+                    })
+                    window.location.href = "{{ route('formBuilder') }}";
                 }
             })
         })

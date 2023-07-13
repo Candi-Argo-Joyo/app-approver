@@ -1,9 +1,9 @@
 @extends('index')
 @section('title', 'Dashboard | Aprover KDDI')
 @section('css')
-    <link href="../assets/extra-libs/c3/c3.min.css" rel="stylesheet">
-    <link href="../assets/libs/chartist/dist/chartist.min.css" rel="stylesheet">
-    <link href="../assets/extra-libs/jvector/jquery-jvectormap-2.0.2.css" rel="stylesheet" />
+    <link href="{{ asset('assets/extra-libs/c3/c3.min.css" rel="stylesheet') }}">
+    <link href="{{ asset('assets/libs/chartist/dist/chartist.min.css" rel="stylesheet') }}">
+    <link href="{{ asset('assets/extra-libs/jvector/jquery-jvectormap-2.0.2.css" rel="stylesheet') }}">
 @endsection
 @section('content')
 
@@ -12,7 +12,8 @@
         <div class="page-breadcrumb">
             <div class="row">
                 <div class="col-7 align-self-center">
-                    <h3 class="page-title text-truncate text-dark font-weight-medium mb-1">Good Morning Jason!</h3>
+                    <h3 class="page-title text-truncate text-dark font-weight-medium mb-1">Hi, {{ Auth::user()['name'] }}!
+                    </h3>
                     <div class="d-flex align-items-center">
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb m-0 p-0">
@@ -22,16 +23,6 @@
                         </nav>
                     </div>
                 </div>
-                {{-- <div class="col-5 align-self-center">
-                <div class="customize-input float-end">
-                    <select
-                        class="custom-select custom-select-set form-control bg-white border-0 custom-shadow custom-radius">
-                        <option selected>Aug 23</option>
-                        <option value="1">July 23</option>
-                        <option value="2">Jun 23</option>
-                    </select>
-                </div>
-            </div> --}}
             </div>
         </div>
         <!-- ============================================================== -->
@@ -45,9 +36,9 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <div class="d-inline-flex align-items-center">
-                                        <h2 class="text-dark mb-1 font-weight-medium">236</h2>
+                                        <h2 class="text-dark mb-1 font-weight-medium user">0</h2>
                                     </div>
-                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data Kredit
+                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data User
                                     </h6>
                                 </div>
                             </div>
@@ -59,8 +50,8 @@
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
-                                    <h2 class="text-dark mb-1 w-100 text-truncate font-weight-medium">18,306</h2>
-                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data Memo
+                                    <h2 class="text-dark mb-1 w-100 text-truncate font-weight-medium form">0</h2>
+                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data Form
                                     </h6>
                                 </div>
                             </div>
@@ -72,8 +63,8 @@
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
-                                    <h2 class="text-dark mb-1 w-100 text-truncate font-weight-medium">18,306</h2>
-                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data Dealer
+                                    <h2 class="text-dark mb-1 w-100 text-truncate font-weight-medium division">0</h2>
+                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data Division
                                     </h6>
                                 </div>
                             </div>
@@ -85,8 +76,8 @@
                         <div class="card-body">
                             <div class="d-flex align-items-center">
                                 <div>
-                                    <h2 class="text-dark mb-1 w-100 text-truncate font-weight-medium">18,306</h2>
-                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data Sales
+                                    <h2 class="text-dark mb-1 w-100 text-truncate font-weight-medium position">0</h2>
+                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data Position
                                     </h6>
                                 </div>
                             </div>
@@ -168,9 +159,9 @@
                                 <div class="d-flex align-items-center">
                                     <div>
                                         <div class="d-inline-flex align-items-center">
-                                            <h2 class="text-dark mb-1 font-weight-medium">236</h2>
+                                            <h2 class="text-dark mb-1 font-weight-medium user">236</h2>
                                         </div>
-                                        <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data Kredit
+                                        <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Data User
                                         </h6>
                                     </div>
                                 </div>
@@ -278,11 +269,25 @@
     @endif
 @endsection
 @section('script')
-    <script src="../assets/extra-libs/c3/d3.min.js"></script>
-    <script src="../assets/extra-libs/c3/c3.min.js"></script>
-    <script src="../assets/libs/chartist/dist/chartist.min.js"></script>
-    <script src="../assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
-    <script src="../assets/extra-libs/jvector/jquery-jvectormap-2.0.2.min.js"></script>
-    <script src="../assets/extra-libs/jvector/jquery-jvectormap-world-mill-en.js"></script>
-    <script src="../dist/js/pages/dashboards/dashboard1.min.js"></script>
+    <script src="{{ asset('assets/extra-libs/c3/d3.min.js') }}"></script>
+    <script src="{{ asset('assets/extra-libs/c3/c3.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/chartist/dist/chartist.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js') }}"></script>
+    <script src="{{ asset('assets/extra-libs/jvector/jquery-jvectormap-2.0.2.min.js') }}"></script>
+    <script src="{{ asset('assets/extra-libs/jvector/jquery-jvectormap-world-mill-en.js') }}"></script>
+    <script src="{{ asset('dist/js/pages/dashboards/dashboard1.min.js') }}"></script>
+
+    <script>
+        $.ajax({
+            url: "{{ route('dashboard.count') }}",
+            type: "get",
+            dataType: "json",
+            success: function(response) {
+                $('.user').html(response.total.user)
+                $('.form').html(response.total.form)
+                $('.division').html(response.total.division)
+                $('.position').html(response.total.position)
+            }
+        })
+    </script>
 @endsection

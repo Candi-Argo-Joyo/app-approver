@@ -4,13 +4,36 @@
     <link rel="stylesheet" href="{{ asset('dist/css/custom.css') }}">
     <script src="https://cdn.tiny.cloud/1/bx37734n27j3z8dfd0nytnxe3jmv18nlkh47fvwbbchlow82/tinymce/6/tinymce.min.js"
         referrerpolicy="origin"></script>
+    <link rel="stylesheet" href="{{ asset('assets/select2/css/select2.css') }}">
 @endsection
 @section('content')
-    {{-- <style>
-        .ck-editor__editable {
-            min-height: 200px;
+    <style>
+        .select2-container--default .select2-selection--single {
+            background-color: unset;
+            padding: 6px 12px;
         }
-    </style> --}}
+
+        .select2-container .select2-selection--single {
+            height: unset;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 37px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: unset;
+        }
+
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #e9ecef;
+        }
+
+        .is-invalid .select2-selection,
+        .needs-validation~span>.select2-dropdown {
+            border-color: var(--bs-danger) !important;
+        }
+    </style>
     <!-- ============================================================== -->
     <div class="page-breadcrumb">
         <div class="row">
@@ -50,7 +73,6 @@
                         <div data-save-html class="h6">
                             <?= $html->html_builder ?>
                         </div>
-
                         <?php }else{ ?>
                         <button data-bs-toggle="modal" data-bs-target="#formName"
                             class="w-100 border-dashed-top border-dashed-bottom border-dashed-right border-dashed-left border-color-gray bg-layout py-5 text-center create-form"
@@ -105,19 +127,31 @@
                                     </div>
                                 </div>
                             </div>
-                            {{-- </div> --}}
-                            <h5 class="m-0">Set Approver <small class="text-danger">*</small></h5>
+                            {{-- setting halaman approver --}}
+                            <div class="col-md-6 mb-4">
+                                <div class="form-group">
+                                    <label for="approval-page">Set Approval Page <small class="text-danger">*</small>
+                                        <br>
+                                        <small class="text-info">form will be displayed on the selected page</small>
+                                    </label>
+                                    <select name="approval-page" id="approval-page" class="form-control">
+                                        <option value="">--Select Page Report--</option>
+                                    </select>
+                                    <div id="invalid-approval-page" class="invalid-feedback">
+                                    </div>
+                                </div>
+                            </div>
+                            {{-- <h5 class="mt-4">Set Approval Page <small class="text-danger">*</small></h5>
                             <div class="d-flex justify-content-between">
-                                <small class="text-info">select user as approver</small>
+                                <small class="text-info">select page approver</small>
                                 <a href="javascript:void(0)" class="badge bg-primary more-approver">Add approval</a>
                             </div>
                             <table class="table">
                                 <thead>
                                     <tr>
                                         <th>Approver Name</th>
-                                        <th>Approver (user)</th>
                                         <th>Set Page Approver</th>
-                                        <th>Action</th>
+                                        <th style="width: 12px">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="approver-append">
@@ -131,20 +165,7 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <select name="user-approver[]" id="" class="form-control">
-                                                        <option value="">--Select Approver--</option>
-                                                        @foreach ($user as $u)
-                                                            <option value="{{ $u->id }}"
-                                                                {{ $sp->id_user_approver == $u->id ? 'selected' : '' }}>
-                                                                {{ $u->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    <div id="invalid-user-approver" class="invalid-feedback">
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <select name="page-approver[]" id="page-approver"
-                                                        class="form-control">
+                                                    <select name="page-approver[]" id="page-approver" class="form-control">
                                                         <option value="">--Select Page Approver--</option>
                                                         @foreach ($approver as $a)
                                                             <option value="{{ $a->id }}"
@@ -164,7 +185,7 @@
                                         @endforeach
                                     @endif
                                 </tbody>
-                            </table>
+                            </table> --}}
                             <a href="javascript:void(0)"
                                 class="mt-4 save-form btn btn-success text-center border-dashed-top border-dashed-bottom border-dashed-left border-dashed-right border-color-gray">
                                 Save Form
@@ -320,6 +341,12 @@
                                 <input type="radio" id="pic-check-box" hidden name="type_field" value="check-box">
                             </label>
                         </div>
+                        <div class="col-md-4 mb-2">
+                            <label role="button" for="pic-item" data-select-radio
+                                class="d-block py-3 text-center bg-gray">Item
+                                <input type="radio" id="pic-item" hidden name="type_field" value="item">
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -365,12 +392,49 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div>
+    <div id="groupItems" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="groupItemsLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="groupItemsLabel">Choose Group Items</h4>
+                    <button type="button" class="btn-close close_item" data-bs-dismiss="modal"
+                        aria-hidden="true"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="form-name">Select Group Item</label>
+                        <select name="group_item" id="group_item" class="form-control">
+                            <option value="">--Select Group Items--</option>
+                            @foreach ($group_item as $item)
+                                <option value="{{ $item->id }}">{{ $item->name }}</option>
+                            @endforeach
+                        </select>
+                        <div id="invalid-group-item" class="invalid-feedback">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light close_item" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary submit-item">Apply</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
 @endsection
 @section('script')
+    <script src="{{ asset('assets/select2/js/select2.js') }}"></script>
     <script>
+        getReportApprovalPage()
+
+        $('#group_item').select2({
+            width: '100%',
+            dropdownParent: $("#groupItems"),
+        })
+
         tinymce.init({
             selector: 'textarea',
-            plugins: 'anchor autolink charmap codesample lists table casechange formatpainter permanentpen powerpaste advtable advcode autocorrect typography inlinecss',
+            plugins: 'charmap codesample lists table',
             toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | removeformat',
             tinycomments_mode: 'embedded',
             tinycomments_author: 'Author name',
@@ -536,40 +600,31 @@
         $('.submit-field').on('click', function() {
             let totalField = typefield($('input[name="type_field"]:checked').val())
             $(".preloader").fadeIn()
-            $.ajax({
-                url: "{{ route('formBuilder.getfield') }}",
-                type: "post",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    layout: $('input[name="on_layout"]').val(),
-                    section: $('input[name="on_section"]').val(),
-                    type: $('input[name="type_field"]:checked').val(),
-                    id_layout: $('input[name="id_layout"]').val(),
-                    id_html: $('input[id="html_form"]').val(),
-                    length: totalField
-                },
-                dataType: "json",
-                success: function(response) {
-                    $(".preloader").fadeOut()
-                    $('#fields').modal('hide')
-                    $(`#${response.layout} > #${response.section} > div[data-iner]`).append(response
-                        .html)
+            if ($('input[name="type_field"]:checked').val() == 'item') {
+                $('#groupItems').modal('show')
+                $('#fields').modal('hide')
+                $(".preloader").fadeOut()
 
-                    if (response.script != 'null') {
-                        $('#script').append(response.script)
-                    }
+                return false
+            } else {
+                submitfield(totalField)
+            }
+        })
 
-                    if ($('input[name="type_field"]:checked').val() == 'textarea') {
-                        let textareaCount = $(`a[data-no-urut="${response.layout}"]`).attr(
-                            'data-iner-textarea')
-                        $(`a[data-no-urut="${response.layout}"]`).attr('data-iner-textarea',
-                            textareaCount > 0 ? (textareaCount + ',' + response.countTextArea) :
-                            response.countTextArea)
-                    }
+        $(document).on('click', '.close_item', function() {
+            $('#fields').modal('show')
+            $('#groupItems').modal('hide')
+        })
 
-                    formBuild()
-                }
-            })
+        $('.submit-item').on('click', function() {
+            if ($('#group_item').find(":selected").val() == '') {
+                $('#group_item + span').addClass('is-invalid')
+                $('#invalid-group-item').html('Group items cannot be empty')
+            } else {
+                let totalField = typefield($('input[name="type_field"]:checked').val())
+                submitfield(totalField)
+                $('#fields').modal('hide')
+            }
         })
 
         // menghapus field berdasarkan button delete
@@ -632,6 +687,28 @@
                     break;
                 case 'radio':
                     reOrderRadio()
+                    break;
+                case 'item':
+                    if ($('.item').length > 0) {
+                        let id_item = []
+                        $('input[name-item]').each(function name(i) {
+                            id_item.push($(this).attr('id-field'))
+                            $(this).attr('data-name', 'item-' + i)
+                        })
+
+                        $.ajax({
+                            url: "{{ route('formBuilder.renamefielditems') }}",
+                            type: 'post',
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                id: id_item
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                                $(".preloader").fadeOut()
+                            }
+                        })
+                    }
                     break;
             }
 
@@ -742,17 +819,17 @@
                 $('.prev').trigger('click')
                 return false
             }
-            console.log($('input[name="approver-name[]"]').length)
+            // console.log($('input[name="approver-name[]"]').length)
 
-            if ($('input[name="approver-name[]"]').length == 0) {
-                Swal.fire(
-                    'Ups?',
-                    'Please add approver',
-                    'warning'
-                )
+            // if ($('input[name="approver-name[]"]').length == 0) {
+            //     Swal.fire(
+            //         'Ups?',
+            //         'Please add approver',
+            //         'warning'
+            //     )
 
-                return false
-            }
+            //     return false
+            // }
             // $('select[name="page-approver[]"]').each(function(i, obj) {
             //     if ($(this).val() == '') {
             //         $(this).addClass('is-invalid')
@@ -765,7 +842,7 @@
             //     }
             // });
 
-            formBuild()
+            // formBuild()
 
             $(".preloader").fadeIn()
             $('div[data-action]').remove()
@@ -782,27 +859,30 @@
                 $(this).removeClass('mb-3')
             });
 
+            $('textarea[data-filed]').each(function(i) {
+                $(this).removeAttr('style').removeAttr('aria-hidden')
+            });
+
+            $('div[class="tox tox-tinymce"]').each(function(i) {
+                $(this).remove()
+            });
+
             let form = []
             $('div[data-form-final]').each(function(i, obj) {
                 form.push($(this).html());
             });
 
-            let id_approver = []
-            let approver_name = []
-            $('input[name="approver-name[]"]').each(function(i, obj) {
-                approver_name.push($(this).val());
-                id_approver.push($(this).attr('data-id'));
-            });
+            // let id_approver = []
+            // let approver_name = []
+            // $('input[name="approver-name[]"]').each(function(i, obj) {
+            //     approver_name.push($(this).val());
+            //     id_approver.push($(this).attr('data-id'));
+            // });
 
-            let approver_user = []
-            $('select[name="user-approver[]"]').each(function(i, obj) {
-                approver_user.push($(this).val());
-            });
-
-            let page_approver = []
-            $('select[name="page-approver[]"]').each(function(i, obj) {
-                page_approver.push($(this).val());
-            });
+            // let page_approver = []
+            // $('select[name="page-approver[]"]').each(function(i, obj) {
+            //     page_approver.push($(this).val());
+            // });
 
             $.ajax({
                 url: "{{ route('formBuilder.updateformhtml') }}",
@@ -814,12 +894,15 @@
                     param_html: $('#html_form').val(),
                     set_page: $('select[name=parent-page] option').filter(':selected').val(),
                     report_page: $('select[name=report-page] option').filter(':selected').val(),
+                    approver_page: $('select[name=approval-page] option').filter(':selected').val(),
                     is_edit: $('#is-edit').val(),
-                    id_approver: id_approver,
-                    delete_approver: $('#is-delet-approver').val(),
-                    approver_name: approver_name,
-                    approver_user: approver_user,
-                    page_approver: page_approver
+                    // id_approver: id_approver,
+                    // delete_approver: $('#is-delet-approver').val(),
+                    // approver_name: approver_name,
+                    // page_approver: page_approver,
+                    // id_validator: $('input[name="validator-name[]"]').attr('data-id'),
+                    // validator_name: $('input[name="validator-name[]"]').val(),
+                    // page_validator: $('input[name="page-validator[]"]').attr('data-id-validator')
                 },
                 dataType: "json",
                 success: function(response) {
@@ -868,33 +951,6 @@
                             });
                         }
 
-                        if (response.error.user_approver) {
-                            let val_user_approver = ''
-                            $('select[name="user-approver[]"]').each(function(i, obj) {
-                                if ($(this).val() == '') {
-                                    $(this).addClass('is-invalid')
-                                    $(this).next().html('user approvers cannot be empty')
-                                } else {
-                                    $(this).removeClass('is-invalid')
-                                    $(this).next().html('')
-                                }
-
-                                if ($(this).val() != '') {
-                                    if (val_user_approver == $(this).val()) {
-                                        $(this).addClass('is-invalid')
-                                        $(this).next().html('user approvers cannot be the same')
-                                    } else {
-                                        $(this).removeClass('is-invalid')
-                                        $(this).next().html('')
-                                    }
-                                }
-
-                                if ($(this).val() != '') {
-                                    val_user_approver = $(this).val()
-                                }
-                            });
-                        }
-
                         if (response.error.page_approver) {
                             let val_page_appover = ''
                             $('select[name="page-approver[]"]').each(function(i, obj) {
@@ -921,6 +977,28 @@
                                 }
                             });
                         }
+
+                        // if (response.error.name_validator) {
+                        //     if (response.error.name_validator[0].value_empty) {
+                        //         $('input[name="validator-name[]"]').addClass('is-invalid')
+                        //         $('input[name="validator-name[]"]').next().html(
+                        //             response.error.name_validator[0].value_empty)
+                        //     } else {
+                        //         $('input[name="validator-name[]"]').removeClass('is-invalid')
+                        //         $('input[name="validator-name[]"]').next().html('')
+                        //     }
+                        // }
+
+                        // if (response.error.page_validator) {
+                        //     if (response.error.page_validator[0].value_empty) {
+                        //         $('input[name="page-validator[]"]').addClass('is-invalid')
+                        //         $('input[name="page-validator[]"]').next().html(
+                        //             response.error.page_validator[0].value_empty)
+                        //     } else {
+                        //         $('input[name="page-validator[]"]').removeClass('is-invalid')
+                        //         $('input[name="page-validator[]"]').next().html('')
+                        //     }
+                        // }
                     } else {
                         window.location.href = "{{ route('formBuilder') }}";
                     }
@@ -990,12 +1068,25 @@
                 return false
             }
 
+            // if (type != 'item') {} else {}
+            let data_name = $(this).attr('data-name')
+            // const data = {
+            //     url: "{{ route('formBuilder.renamefield') }}",
+            //     data: {
+            //         _token: "{{ csrf_token() }}",
+            //         id: $(this).attr('id-field'),
+            //         name: data_name.replace(/\s+/g, '-').toLowerCase(),
+            //         original_name: val
+            //     }
+            // }
+
             const data = {
                 url: "{{ route('formBuilder.renamefield') }}",
                 data: {
                     _token: "{{ csrf_token() }}",
                     id: $(this).attr('id-field'),
-                    name: val.replace(/\s+/g, '-').toLowerCase(),
+                    name: type == 'item' ? data_name.replace(/\s+/g, '-').toLowerCase() : val.replace(/\s+/g,
+                        '-').toLowerCase(),
                     original_name: val
                 }
             }
@@ -1043,6 +1134,13 @@
                         formBuild()
                     }
                     break;
+                case 'item':
+                    if (val != $(this).attr('value')) {
+                        $(this).attr('has-change', 'true').attr('value', val).prop('readonly', true).removeClass(
+                            'border-bottom')
+                        formBuild()
+                    }
+                    break;
                 default:
                     let targetchange = $(this).attr('data-target-input')
 
@@ -1056,6 +1154,10 @@
                     break;
             }
         })
+
+
+        $('#report-page').html('<option value="">--Select Page Report--</option>').prop('disabled', true)
+        $('#approval-page').html('<option value="">--Select Approval Page--</option>').prop('disabled', true)
 
         $('#parent-page').on('change', function() {
             if ($('select[name=parent-page] option').filter(':selected').val() != '') {
@@ -1084,22 +1186,35 @@
                     dataType: "json",
                     success: function(response) {
                         if (response.success) {
-                            $('select[name="page-approver[]"]').each(function(i) {
-                                $(this).html(
-                                    '<option value="">--Select Page Approver--</option>')
-                                for (let index = 0; index < response.success.data
-                                    .length; index++) {
-                                    $(this).append('<option value="' + response.success.data[
-                                            index].id +
-                                        '">' + response.success.data[index].name +
+                            // $('select[name="page-approver[]"]').each(function(i) {
+                            //     $(this).html(
+                            //         '<option value="">--Select Page Approver--</option>')
+                            //     for (let index = 0; index < response.success.data
+                            //         .length; index++) {
+                            //         $(this).append('<option value="' + response.success.data[
+                            //                 index].id +
+                            //             '">' + response.success.data[index].name +
+                            //             '</option>')
+                            //     }
+                            // })
+
+                            if (response.success.data) {
+                                $('#approval-page').html(
+                                    '<option value="">--Select Approval Page--</option>').prop(
+                                    'disabled', false)
+
+                                for (let i = 0; i < response.success.data.length; i++) {
+                                    $('#approval-page').append(
+                                        '<option value="' + response.success.data[i].id +
+                                        '">' + response.success.data[i].name +
                                         '</option>')
                                 }
-                            })
+                            }
 
                             if (response.success.report) {
-                                $('select[name="report-page"]').prop('disabled', false)
                                 $('#report-page').html(
-                                    '<option value="">--Select Page Report--</option>')
+                                    '<option value="">--Select Page Report--</option>').prop(
+                                    'disabled', false)
 
                                 for (let i = 0; i < response.success.report.length; i++) {
                                     $('#report-page').append(
@@ -1108,11 +1223,20 @@
                                         '</option>')
                                 }
                             }
+
+                            if (response.success.validator) {
+                                $('#page-validator').val(response.success.validator.name).attr(
+                                    'data-id-validator', response.success.validator.id)
+                            }
                         } else {
 
                         }
                     }
                 })
+            } else {
+                $('#report-page').html('<option value="">--Select Page Report--</option>').prop('disabled', true)
+                $('#approval-page').html('<option value="">--Select Approval Page--</option>').prop('disabled',
+                    true)
             }
         })
 
@@ -1158,6 +1282,44 @@
             $(this).closest("tr").remove();
         })
 
+        function submitfield(totalField) {
+            $.ajax({
+                url: "{{ route('formBuilder.getfield') }}",
+                type: "post",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    layout: $('input[name="on_layout"]').val(),
+                    section: $('input[name="on_section"]').val(),
+                    type: $('input[name="type_field"]:checked').val(),
+                    id_layout: $('input[name="id_layout"]').val(),
+                    id_html: $('input[id="html_form"]').val(),
+                    length: totalField,
+                    groupItems: $('#group_item').find(":selected").val()
+                },
+                dataType: "json",
+                success: function(response) {
+                    $(".preloader").fadeOut()
+                    $('#fields').modal('hide')
+
+                    $(`#${response.layout} > #${response.section} > div[data-iner]`).append(response
+                        .html)
+
+                    if (response.script != 'null') {
+                        $('#script').append(response.script)
+                    }
+
+                    if ($('input[name="type_field"]:checked').val() == 'textarea') {
+                        let textareaCount = $(`a[data-no-urut="${response.layout}"]`).attr(
+                            'data-iner-textarea')
+                        $(`a[data-no-urut="${response.layout}"]`).attr('data-iner-textarea',
+                            textareaCount > 0 ? (textareaCount + ',' + response.countTextArea) :
+                            response.countTextArea)
+                    }
+                    formBuild()
+                }
+            })
+        }
+
         function typefield(field) {
             let countField
 
@@ -1189,6 +1351,9 @@
                 case 'check-box':
                     countField = $('.checkbox').length
                     break;
+                case 'item':
+                    countField = $('.item').length
+                    break;
             }
 
             return countField;
@@ -1211,6 +1376,30 @@
                     if ($('.input-textarea').length > 0) {
                         location.reload();
                     }
+                }
+            })
+        }
+
+        function getReportApprovalPage() {
+            $.ajax({
+                url: "{{ route('formBuilder.getReportApproval') }}",
+                type: "post",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    parent: $('select[name=parent-page] option').filter(':selected').attr('data-param'),
+                    param_html: $('#html_form').val()
+                },
+                dataType: "json",
+                success: function(response) {
+                    $('#report-page').html(
+                        `<option value="">--Select Page Report--</option>
+                        <option value="${response.data.report.id}" selected>${response.data.report.name}</option>`
+                    ).prop('disabled', false)
+
+                    $('#approval-page').html(
+                        `<option value="">--Select Approval Page--</option>
+                        <option value="${response.data.approver.id}" selected>${response.data.approver.name}</option>`
+                    ).prop('disabled', false)
                 }
             })
         }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,12 @@ class Users extends Controller
     public function index()
     {
         return view('pages/users/index');
+    }
+
+    public function getUsers()
+    {
+        $data = User::where('is_mapping', 'true')->whereIn('role', ['manager', 'validator', 'user'])->get();
+        return response()->json(['data' => $data]);
     }
 
     public function save(Request $request)

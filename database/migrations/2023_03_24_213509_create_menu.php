@@ -15,10 +15,10 @@ class CreateMenu extends Migration
     {
         Schema::create('menu', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('id_menu_group');
+            // $table->bigInteger('id_menu_group')->nullable();
             $table->bigInteger('id_html_form')->nullable();
-            $table->bigInteger('id_user_approver')->nullable();
-            $table->bigInteger('id_divisi')->nullable();
+            // $table->bigInteger('id_user_approver')->nullable();
+            // $table->bigInteger('id_divisi')->nullable();
             $table->string('name');
             $table->string('slug');
             $table->string('type');

@@ -15,92 +15,11 @@ class DataMenu extends Controller
         LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
 
         $data = [
-            'divsi' => DB::table('division')->get()
+            'divsi' => DB::table('division')->get(),
+            'users' => DB::table('users')->where('role', 'manager')->get(),
+            'users_v' => DB::table('users')->where('role', 'validator')->get()
         ];
         return view('pages/datamenu/index', $data);
-    }
-
-    public function getGroupAll()
-    {
-        $html = '';
-        $option = '';
-        $data = DB::table('menu_group')->get();
-        foreach ($data as $d) {
-            $divisi = DB::table('division')->where('id', $d->id_divisi)->first();
-            $html .= ' <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <strong>[division:' . $divisi->name . '] ' . $d->name . '</strong>
-                            <span>
-                                  <a href="javascript:void(0)" data-param=' . $d->id . ' class="badge bg-warning badge-pill edit-group">edit</a>
-                                  <a href="javascript:void(0)" data-param=' . $d->id . ' class="badge bg-danger badge-pill del-group">delete</a>
-                            </span>
-                       </li>';
-
-            $option .= '<option value="' . $d->id . '">[division: ' . $divisi->name . '] ' . $d->name . '</option>';
-        }
-
-        return response()->json(['data' => $data, 'count_group' => count($data), 'html' => $html, 'option' => $option]);
-    }
-
-    public function saveGroup(Request $request)
-    {
-        if ($request->param) {
-            $validator = Validator::make(
-                $request->all(),
-                [
-                    'group' => 'required',
-                    'divisi' => 'required|integer|regex:/^([0-9]+)$/|not_in:0|exists:division,id',
-                    'param' => 'required|integer|regex:/^([0-9]+)$/|not_in:0',
-                ]
-            );
-        } else {
-            $validator = Validator::make($request->all(), [
-                'group' => 'required',
-                'divisi' => 'required|integer|regex:/^([0-9]+)$/|not_in:0|exists:division,id',
-            ]);
-        }
-
-        if ($validator->fails()) {
-            return response()->json([
-                'error' => $validator->errors()
-            ]);
-        }
-
-        if ($request->param) {
-            DB::table('menu_group')->where('id', $request->param)->update([
-                'name' => strtoupper($request->group),
-                'id_divisi' => $request->divisi,
-                'updated_at' => date('Y-m-d H:i:s')
-            ]);
-        } else {
-            DB::table('menu_group')->insert([
-                'name' => strtoupper($request->group),
-                'id_divisi' => $request->divisi,
-                'created_at' => date('Y-m-d H:i:s')
-            ]);
-        }
-
-        LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
-        return response()->json(['success' => 'Group created successfully.']);
-    }
-
-    public function getOneGroup(Request $request)
-    {
-        $validasi = DB::table('menu_group')->where('id', $request->param)->first();
-        if ($validasi) {
-            return response()->json(['success' => $validasi]);
-        }
-        return response()->json(['error' => 'Group find not found.']);
-    }
-
-    public function delGroup(Request $request)
-    {
-        $validasi = DB::table('menu_group')->where('id', $request->param)->first();
-        if ($validasi) {
-            LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
-            DB::table('menu_group')->where('id', $request->param)->delete();
-            return response()->json(['success' => 'Group delete successfully.']);
-        }
-        return response()->json(['error' => 'Group delete error.']);
     }
 
     public function saveMenu(Request $request)
@@ -110,7 +29,6 @@ class DataMenu extends Controller
                 $validator = Validator::make(
                     $request->all(),
                     [
-                        'id_group' => 'required|integer|regex:/^([0-9]+)$/|not_in:0|exists:menu_group,id',
                         'name' => 'required|unique:menu,name,' . $request->param,
                         'type' => 'required',
                     ]
@@ -119,7 +37,6 @@ class DataMenu extends Controller
                 $validator = Validator::make(
                     $request->all(),
                     [
-                        'id_group' => 'required|integer|regex:/^([0-9]+)$/|not_in:0|exists:menu_group,id',
                         'name' => 'required|unique:menu,name',
                         'type' => 'required',
                     ]
@@ -130,7 +47,6 @@ class DataMenu extends Controller
                 $validator = Validator::make(
                     $request->all(),
                     [
-                        'id_group' => 'required|integer|regex:/^([0-9]+)$/|not_in:0|exists:menu_group,id',
                         'name' => 'required|unique:menu,name,' . $request->param,
                         'type' => 'required',
                         'parent' => 'required|integer|regex:/^([0-9]+)$/|not_in:0',
@@ -140,7 +56,6 @@ class DataMenu extends Controller
                 $validator = Validator::make(
                     $request->all(),
                     [
-                        'id_group' => 'required|integer|regex:/^([0-9]+)$/|not_in:0|exists:menu_group,id',
                         'name' => 'required|unique:menu,name',
                         'type' => 'required',
                         'parent' => 'required|integer|regex:/^([0-9]+)$/|not_in:0',
@@ -157,50 +72,27 @@ class DataMenu extends Controller
 
         DB::beginTransaction();
         try {
-            $group = DB::table('menu_group')->where('id', $request->id_group)->first();
-            if ($request->type == 'dropdown') {
-                if ($request->param_menu) {
-                    DB::table('menu')->where('id', $request->param_menu)->update([
-                        'id_menu_group' => $request->id_group,
-                        'id_divisi' => $group->id_divisi,
-                        'name' => $request->name,
-                        'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
-                        'type' => 'dropdown',
-                        'updated_at' => date('Y-m-d H:i:s')
-                    ]);
-                } else {
-                    DB::table('menu')->insert([
-                        'id_menu_group' => $request->id_group,
-                        'id_divisi' => $group->id_divisi,
-                        'name' => $request->name,
-                        'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
-                        'type' => 'dropdown',
-                        'parent' => '0',
-                        'created_at' => date('Y-m-d H:i:s')
-                    ]);
-                }
+            $parent = $request->type == 'dropdown' ? '0' : $request->parent;
+
+            if ($request->param_menu) {
+                DB::table('menu')->where('id', $request->param_menu)->update([
+                    'name' => $request->name,
+                    'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+
+                DB::table('menu')->where('parent', $request->param_menu)->update([
+                    'name_parent' => $request->name,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
             } else {
-                if ($request->param_menu) {
-                    DB::table('menu')->where('id', $request->param_menu)->update([
-                        'id_menu_group' => $request->id_group,
-                        'id_divisi' => $group->id_divisi,
-                        'name' => $request->name,
-                        'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
-                        'type' => 'singgle',
-                        'parent' => $request->parent,
-                        'updated_at' => date('Y-m-d H:i:s')
-                    ]);
-                } else {
-                    DB::table('menu')->insert([
-                        'id_menu_group' => $request->id_group,
-                        'id_divisi' => $group->id_divisi,
-                        'name' => $request->name,
-                        'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
-                        'type' => 'singgle',
-                        'parent' => $request->parent,
-                        'created_at' => date('Y-m-d H:i:s')
-                    ]);
-                }
+                DB::table('menu')->insert([
+                    'name' => $request->name,
+                    'slug' => preg_replace('/[^a-z0-9]+/i', '-', trim(strtolower($request->name))),
+                    'type' => 'singgle',
+                    'parent' => $parent,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
             }
 
             DB::commit();
@@ -228,13 +120,21 @@ class DataMenu extends Controller
 
     public function deleteMenu(Request $request)
     {
-        $validasi = DB::table('menu')->where('id', $request->param)->first();
+        $validasi = DB::table('menu')->where('id', $request->param)->where('id_html_form', null)->where('status', 'non-active')->first();
         if ($validasi) {
             LogActivity::addToLog('Access: [' . last(request()->segments()) . ']');
-            DB::table('menu')->where('id', $request->param)->delete();
-            return response()->json([
-                'success' => 'Menu deleted successfully'
-            ]);
+            if ($validasi->parent == '0') {
+                DB::table('menu')->where('id', $request->param)->delete();
+                DB::table('menu')->where('parent', $validasi->id)->delete();
+                return response()->json([
+                    'success' => 'Menu deleted successfully'
+                ]);
+            } else {
+                DB::table('menu')->where('id', $request->param)->delete();
+                return response()->json([
+                    'success' => 'Menu deleted successfully'
+                ]);
+            }
         }
 
         return response()->json([
@@ -244,7 +144,7 @@ class DataMenu extends Controller
 
     public function getParentMenu(Request $request)
     {
-        $menu = DB::table('menu')->where('parent', '0')->where('id_menu_group', $request->id_group)->get();
+        $menu = DB::table('menu')->where('parent', '0')->where('id_menu_group', $request->id_group)->orderBy('id', 'asc')->get();
         return response()->json(['data' => $menu]);
     }
 
@@ -254,44 +154,69 @@ class DataMenu extends Controller
         $html = '<ul class="list-group">';
         $parent = [];
 
-        foreach ($group as $g) {
-            $divisi = DB::table('division')->where('id', $g->id_divisi)->first();
-            $html .= '<li class="list-group-item d-flex justify-content-between align-items-center">
-                        <strong>[group][division:' . $divisi->name . '] ' . $g->name . '</strong>
-                      </li>';
-            $parent = DB::table('menu')->where('id_menu_group', $g->id)->where('parent', '0')->get();
-            foreach ($parent as $p) {
-                $html .= '<li class="ml-4 list-group-item d-flex justify-content-between align-items-center"
-                                    style="margin-left: 30px">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text feather-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                        [parent][division:' . $divisi->name . '] ' . $p->name . '
-                                    </span>
-                                    <span>
-                                        <a href="javascript:void(0)" class="badge bg-warning badge-pill edit-parent" data-param="' . $p->id . '">edit</a>
-                                        <a href="javascript:void(0)" class="badge bg-danger badge-pill delete-parent" data-param="' . $p->id . '">delete</a>
-                                    </span>
-                                </li>';
-                $menu = DB::table('menu')->where('parent', $p->id)->get();
-                foreach ($menu as $m) {
+        // foreach ($group as $g) {
+        // $divisi = DB::table('division')->where('id', $g->id_divisi)->first();
+        // $html .= '<li class="list-group-item d-flex justify-content-between align-items-center">
+        //                 <strong>[group] ' . $g->name . '</strong>
+        //               </li>';
+        // $parent = DB::table('menu')->where('id_menu_group', $g->id)->where('parent', '0')->get();
+        $parent = DB::table('menu')->where('parent', '0')->get();
+        foreach ($parent as $p) {
+            if ($p->status == 'active') {
+                $html .= '<li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text feather-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                            [parent] ' . $p->name . '
+                                        </span>
+                                        <span>
+                                            <a href="javascript:void(0)" status="true" class="badge bg-success badge-pill change-status" data-param="' . $p->id . '">Aktif</a>
+                                            <a href="javascript:void(0)" class="badge bg-warning badge-pill edit" data-param="' . $p->id . '">edit</a>
+                                        </span>
+                                    </li>';
+            } else {
+                $html .= '<li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="d-flex align-items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text feather-icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                            [parent] ' . $p->name . '
+                                        </span>
+                                        <span>
+                                            <a href="javascript:void(0)" status="false" class="badge bg-primary badge-pill change-status" data-param="' . $p->id . '">Non Aktif</a>
+                                            <a href="javascript:void(0)" class="badge bg-warning badge-pill edit" data-param="' . $p->id . '">edit</a>
+                                            <a href="javascript:void(0)" class="badge bg-danger badge-pill delete" data-param="' . $p->id . '">delete</a>
+                                        </span>
+                                    </li>';
+            }
+
+            $menu = DB::table('menu')->where('parent', $p->id)->get();
+            foreach ($menu as $m) {
+                if ($m->status == 'active') {
                     $html .= '<li class="list-group-item d-flex justify-content-between align-items-center"
-                                    style="margin-left: 60px">
-                                    <a href="javascript:void(0)">[child][division:' . $divisi->name . '] ' . $m->name . '</a>
-                                    <span>
-                                        <a href="javascript:void(0)" class="badge bg-warning badge-pill">edit</a>
-                                        <a href="javascript:void(0)" class="badge bg-danger badge-pill">delete</a>
-                                    </span>
-                                </li>';
+                                        style="margin-left: 30px">
+                                        <a href="javascript:void(0)">[child] ' . $m->name . '</a>
+                                        <span>
+                                            <a href="javascript:void(0)" class="badge bg-warning badge-pill edit" data-param="' . $m->id . '">edit</a>
+                                        </span>
+                                    </li>';
+                } else {
+                    $html .= '<li class="list-group-item d-flex justify-content-between align-items-center"
+                                        style="margin-left: 30px">
+                                        <a href="javascript:void(0)">[child] ' . $m->name . '</a>
+                                        <span>
+                                            <a href="javascript:void(0)" data-param="' . $m->id . '" class="badge bg-warning badge-pill edit">edit</a>
+                                            <a href="javascript:void(0)" data-param="' . $m->id . '" class="badge bg-danger badge-pill delete">delete</a>
+                                        </span>
+                                    </li>';
                 }
             }
         }
+        // }
         $html .= '</ul>';
         return response()->json(['html' => $html, 'count_group' => count($group), 'count_menu' => count($parent)]);
     }
 
     public function getSinggleMenu()
     {
-        $menu = DB::table('menu')->where('parent', '0')->get();
+        $menu = DB::table('menu')->where('parent', '0')->orderBy('id', 'asc')->get();
         return response()->json(['data' => $menu]);
     }
 
@@ -329,18 +254,8 @@ class DataMenu extends Controller
             ]);
         }
 
-        $group = DB::table('menu_group')->where('id', $validate->id_menu_group)->first();
         $parent = DB::table('menu')->where('id', $validate->parent)->first();
 
-        // merubah status grup
-        if ($group->status == 'non-active') {
-            DB::table('menu_group')->where('id', $validate->id_menu_group)->update([
-                'status' => 'active',
-                'updated_at' => date('Y-m-d H:i:s')
-            ]);
-        }
-
-        // merubah status parent menu
         if ($parent->status == 'non-active') {
             DB::table('menu')->where('id', $validate->parent)->update([
                 'status' => 'active',
@@ -360,6 +275,54 @@ class DataMenu extends Controller
 
         return response()->json([
             'success' => 'The menu page has been successfully saved'
+        ]);
+    }
+
+    public function deletePageMenu(Request $request)
+    {
+        $validasi = DB::table('menu')->where('id', $request->param)->where('status', 'active')->first();
+        if ($validasi) {
+            DB::table('menu')->where('id', $validasi->id)->update([
+                'page' => NULL,
+                'status' => 'non-active',
+                'name_parent' => NULL,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+            DB::table('menu')->where('id', $validasi->parent)->update([
+                'page' => NULL,
+                'status' => 'non-active',
+                'name_parent' => NULL,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+
+            return response()->json([
+                'success' => 'The menu page has been successfully delete'
+            ]);
+        }
+
+        return response()->json([
+            'error' => 'Menu page failed to delete'
+        ]);
+    }
+
+    public function changeStatus(Request $request)
+    {
+        $validasi = DB::table('menu')->where('id', $request->param)->first();
+        if (!$validasi) {
+            return response()->json([
+                'error' => 'Menu not found'
+            ]);
+        }
+
+        $status = $validasi->status == 'non-active' ? 'active' : 'non-active';
+
+        DB::table('menu')->where('id', $request->param)->update([
+            'status' => $status
+        ]);
+
+        return response()->json([
+            'success' => 'Menu has been changed successfully'
         ]);
     }
 
@@ -425,6 +388,11 @@ class DataMenu extends Controller
                                 <span class="hide-menu"> Digital Assign </span>
                             </a>
                         </li>
+                        <li class="sidebar-item">
+                            <a href="' . route('items') . '" class="sidebar-link">
+                                <span class="hide-menu"> Data Items </span>
+                            </a>
+                        </li>
                         <li
                             class="sidebar-item">
                             <a href="' . route('formBuilder') . '"
@@ -465,50 +433,61 @@ class DataMenu extends Controller
     private function dinamisMenu($role, $divisi)
     {
         $html = '';
-        if ($role == 'administrator') {
-            $group = DB::table('menu_group')->where('status', 'active')->get();
-        } else if ($role == 'manager') {
-            if ($divisi != NULL) {
-                $group = DB::table('menu_group')->where('status', 'active')->where('id_divisi', $divisi)->get();
-            }
-        } else {
-            if ($divisi != NULL) {
-                $group = DB::table('menu_group')->where('status', 'active')->where('id_divisi', $divisi)->get();
-            }
-        }
+        // if ($role == 'administrator') {
+        //     $group = DB::table('menu_group')->where('status', 'active')->get();
+        // } else if ($role == 'manager') {
+        //     if ($divisi != NULL) {
+        //         $group = DB::table('menu_group')->where('status', 'active')->where('id_divisi', $divisi)->get();
+        //     }
+        // } else {
+        //     if ($divisi != NULL) {
+        //         $group = DB::table('menu_group')->where('status', 'active')->where('id_divisi', $divisi)->get();
+        //     }
+        // }
 
-        foreach ($group as $g) {
-            $html .= '<li class="list-divider"></li>
-                         <li class="nav-small-cap"><span class="hide-menu">' . $g->name . '</span></li>';
+        // foreach ($group as $g) {
+        $html .= '<li class="list-divider"></li>
+                         <li class="nav-small-cap"><span class="hide-menu">Form</span></li>';
 
-            $parent = DB::table('menu')->where('id_menu_group', $g->id)->where('parent', '0')->where('status', 'active')->get();
+        // $parent = DB::table('menu')->where('id_menu_group', $g->id)->where('parent', '0')->where('status', 'active')->get();
+        $parent = DB::table('menu')->where('parent', '0')->where('status', 'active')->get();
 
-            foreach ($parent as $p) {
-                $html .= '<li class="sidebar-item">';
-                $html .= '<a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
+        foreach ($parent as $p) {
+            $html .= '<li class="sidebar-item">';
+            $html .= '<a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
                               <i class="icon-notebook font-700"></i>
                               <span class="hide-menu">' . $p->name . ' </span>
                           </a>
                           <ul aria-expanded="false" class="collapse first-level base-level-line">';
 
-                if (Auth::user()->role == 'manager') {
-                    $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->where('is_use', 'yes')->whereIn('page', ['Approver', 'Report'])->orderBy('id', 'asc')->get();
-                } else {
-                    $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->where('is_use', 'yes')->orderBy('id', 'asc')->get();
-                }
+            // if (Auth::user()->role == 'administrator') {
+            //     $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->where('is_use', 'yes')->orderBy('id', 'asc')->get();
+            // } else if (Auth::user()->role == 'validator') {
+            //     $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->where('is_use', 'yes')->whereIn('page', ['Validator', 'Report'])->orderBy('id', 'asc')->get();
+            // } else if (Auth::user()->role == 'manager') {
+            //     $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->where('is_use', 'yes')->whereIn('page', ['Approver', 'Report'])->orderBy('id', 'asc')->get();
+            // } else {
+            //     $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->where('is_use', 'yes')->whereIn('page', ['Entry Page'])->orderBy('id', 'asc')->get();
+            // }
 
-                foreach ($menu as $m) {
-                    $html .= '<li class="sidebar-item">
+            if (Auth::user()->role == 'administrator') {
+                $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->where('is_use', 'yes')->orderBy('id', 'asc')->get();
+            } else {
+                $menu = DB::table('menu')->where('parent', $p->id)->where('status', 'active')->where('is_use', 'yes')->whereIn('page', ['Entry Page', 'Validator', 'Approver', 'Report'])->orderBy('id', 'asc')->get();
+            }
+
+            foreach ($menu as $m) {
+                $html .= '<li class="sidebar-item">
                                     <a href="' . route('pages') . '?menu=' . $m->slug . '" class="sidebar-link">
                                         <span class="hide-menu"> ' . $m->name . ' </span>
                                     </a>
                                 </li>';
-                }
-
-                $html .= '</ul>';
-                $html .= '</li>';
             }
+
+            $html .= '</ul>';
+            $html .= '</li>';
         }
+        // }
 
         return $html;
     }

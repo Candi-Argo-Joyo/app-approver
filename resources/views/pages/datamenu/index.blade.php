@@ -1,8 +1,8 @@
 @extends('index')
 @section('title', 'Setting SSO/WEB | Aprover KDDI')
 @section('css')
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css">
-    <link rel="stylesheet" href="../assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/dataTables.bootstrap4.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/extra-libs/datatables.net-bs4/css/responsive.dataTables.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/select2/css/select2.css') }}">
 @endsection
 @section('content')
@@ -71,16 +71,15 @@
         <div class="row">
             <div class="col-12">
                 <div class="d-flex">
-                    <a href="javascript:void(0)" class="col-sm-2 text-center px-4 py-2 bg-white group">Add Group
-                        Menu</a>
-                    <a href="javascript:void(0)" class="col-sm-2 text-center px-4 py-2 bg-light menu"
-                        style="border-left: 1px solid #c8c8c8">Add
+                    {{-- <a href="javascript:void(0)" class="col-sm-2 text-center px-4 py-2 bg-white group">Add Group
+                        Menu</a> --}}
+                    <a href="javascript:void(0)" class="col-sm-2 text-center px-4 py-2 bg-white menu">Add
                         Menu</a>
                     <a href="javascript:void(0)" class="col-sm-2 text-center px-4 py-2 bg-light page"
                         style="border-left: 1px solid #c8c8c8">Setting
                         Page Menu</a>
                 </div>
-                <div class="card" id="group">
+                {{-- <div class="card" id="group">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
@@ -95,8 +94,8 @@
                             </ul>
                         </div>
                     </div>
-                </div>
-                <div class="card" id="menu" style="display: none">
+                </div> --}}
+                <div class="card" id="menu">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
@@ -154,13 +153,13 @@
                 </div>
                 <div class="modal-body">
                     <input type="text" name="param-menu" id="param-menu" hidden>
-                    <div class="form-group mb-3">
+                    {{-- <div class="form-group mb-3">
                         <label class="form-label" for="menu-group">Select Group <small class="text-danger">*</small></label>
                         <select name="menu-group" id="menu-group" class="form-control">
                         </select>
                         <div id="invalid-menu-group" class="invalid-feedback">
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="form-group mb-3">
                         <label class="form-label" for="name-menu">Name Menu <small class="text-danger">*</small></label>
                         <input class="form-control" type="text" id="name-menu" name="name-menu" required=""
@@ -194,7 +193,7 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div>
-    <div id="menuGroup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="menuGroupLabel"
+    {{-- <div id="menuGroup" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="menuGroupLabel"
         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -232,10 +231,10 @@
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
-    </div>
+    </div> --}}
     <div id="pageMenu" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="pageMenuLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="pageMenuLabel">Form Create Page Menu</h4>
@@ -243,10 +242,9 @@
                 </div>
                 <div class="modal-body">
                     <form id="page-form">
-                        <input type="text" name="param_group" hidden>
                         <div class="form-group mb-3">
                             <label class="form-label" for="parent_menu">Select Parent Menu <small
-                                    class="text-danger">(mandatory)</small></label>
+                                    class="text-danger">*</small></label>
                             <select name="parent_menu" id="parent_menu" class="form-control">
                                 <option value="">--Select Menu--</option>
                             </select>
@@ -255,7 +253,7 @@
                         </div>
                         <div class="form-group mb-3">
                             <label class="form-label" for="child_menu">Select Child Menu <small
-                                    class="text-danger">(mandatory)</small></label>
+                                    class="text-danger">*</small></label>
                             <select name="child_menu" id="child_menu" disabled class="form-control">
                                 <option value="">--Select Menu--</option>
                             </select>
@@ -263,40 +261,74 @@
                             </div>
                         </div>
                         <div class="form-group mb-3">
-                            <label class="form-label">Select menu type <small
-                                    class="text-danger">(mandatory)</small></label>
-                            <div class="d-flex pe-3 gap-2">
-                                <label class="col-sm-4 p-0 form-label lb" click role="button">
-                                    Entry Page <br>
-                                    <small>used for entry forms</small>
-                                    <div style="border: 1px solid #ddd">
-                                        <img src="{{ asset('images/page/entry.png') }}" alt="entry page"
-                                            style="width: 100%">
-                                        <input type="radio" name="page" hidden value="Entry Page">
-                                    </div>
-                                </label>
-                                <label class="col-sm-4 p-0 form-label lb" click role="button">
-                                    Approver Page <br>
-                                    <small>used for form approval</small>
-                                    <div style="border: 1px solid #ddd">
-                                        <img src="{{ asset('images/page/approver.png') }}" alt="Approver page"
-                                            style="width: 100%">
-                                        <input type="radio" name="page" hidden value="Approver">
-                                    </div>
-                                </label>
-                                <label class="col-sm-4 p-0 form-label lb" click role="button">
-                                    Report Page <br>
-                                    <small>used for data reports</small>
-                                    <div style="border: 1px solid #ddd">
-                                        <img src="{{ asset('images/page/report.png') }}" alt="Report page"
-                                            style="width: 100%">
-                                        <input type="radio" name="page" hidden value="Report">
-                                    </div>
-                                </label>
+                            <label class="form-label">Select menu type <small class="text-danger">*</small></label>
+                            <div class="p-3">
+                                <div class="row">
+                                    <label class="col-sm-6 col-md-3 p-2 form-label lb" click role="button">
+                                        Entry Page <br>
+                                        <small>used for entry forms</small>
+                                        <div style="border: 1px solid #ddd">
+                                            <img src="{{ asset('images/page/entry.png') }}" alt="entry page"
+                                                style="width: 100%">
+                                            <input type="radio" name="page" hidden value="Entry Page">
+                                        </div>
+                                    </label>
+                                    <label class="col-sm-6 col-md-3 p-2 form-label lb" click role="button">
+                                        Approver Page <br>
+                                        <small>used for form approval</small>
+                                        <div style="border: 1px solid #ddd">
+                                            <img src="{{ asset('images/page/approver.png') }}" alt="Approver page"
+                                                style="width: 100%">
+                                            <input type="radio" name="page" hidden value="Approver">
+                                        </div>
+                                    </label>
+                                    <label class="col-sm-6 col-md-3 p-2 form-label lb" click role="button">
+                                        Validator Page <br>
+                                        <small>used for form validator</small>
+                                        <div style="border: 1px solid #ddd">
+                                            <img src="{{ asset('images/page/approver.png') }}" alt="Approver page"
+                                                style="width: 100%">
+                                            <input type="radio" name="page" hidden value="Validator">
+                                        </div>
+                                    </label>
+                                    <label class="col-sm-6 col-md-3 p-2 form-label lb" click role="button">
+                                        Report Page <br>
+                                        <small>used for data reports</small>
+                                        <div style="border: 1px solid #ddd">
+                                            <img src="{{ asset('images/page/report.png') }}" alt="Report page"
+                                                style="width: 100%">
+                                            <input type="radio" name="page" hidden value="Report">
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
                             <div id="invalid-select-menu" class="invalid-feedback">
                             </div>
                         </div>
+                        {{-- <div class="form-group mb-3" id="approval" style="display: none">
+                            <label class="form-label">Select User Approval <small class="text-danger">*</small></label>
+                            <select name="user_approval" id="user_approval" class="form-control">
+                                <option value="">--Select User--</option>
+                                @foreach ($users as $us)
+                                    <option value="{{ $us->id }}">{{ $us->name }} [Role: {{ $us->role }}]
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div id="invalid-user-approval" class="invalid-feedback">
+                            </div>
+                        </div>
+                        <div class="form-group mb-3" id="validator" style="display: none">
+                            <label class="form-label">Select User Validator <small class="text-danger">*</small></label>
+                            <select name="user_validator" id="user_validator" class="form-control">
+                                <option value="">--Select User--</option>
+                                @foreach ($users_v as $usv)
+                                    <option value="{{ $usv->id }}">{{ $usv->name }} [Role: {{ $usv->role }}]
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div id="invalid-user-validator" class="invalid-feedback">
+                            </div>
+                        </div> --}}
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -322,9 +354,9 @@
     </div>
 @endsection
 @section('script')
-    <script src="../assets/extra-libs/datatables.net/js/jquery.dataTables.min.js"></script>
-    <script src="../assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js"></script>
-    <script src="../dist/js/pages/datatable/datatable-basic.init.js"></script>
+    <script src="{{ asset('assets/extra-libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/extra-libs/datatables.net-bs4/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('dist/js/pages/datatable/datatable-basic.init.js') }}"></script>
     <script src="{{ asset('assets/select2/js/select2.js') }}"></script>
     <script>
         $(function() {
@@ -382,7 +414,6 @@
                 ]
             });
 
-            getGroup()
             url()
             getAllMenu()
             getSinggleMenu()
@@ -391,14 +422,10 @@
                 var url_string = window.location.href;
                 var url = new URL(url_string);
                 var c = url.searchParams.get("data");
-                // console.log(url_string);
 
                 switch (c) {
                     case 'add-menu':
                         menu()
-                        break;
-                    case 'add-group-menu':
-                        group()
                         break;
                     case 'setting-page-menu':
                         page()
@@ -410,9 +437,6 @@
                 menu()
             })
 
-            $('.group').on('click', function() {
-                group()
-            })
             $('.page').on('click', function() {
                 page()
                 table.ajax.reload();
@@ -431,19 +455,6 @@
                     'add menu', '{{ route('dataMenu') }}?data=add-menu');
             }
 
-            function group() {
-                $('.group').removeClass('bg-light').addClass('bg-white')
-                $('.menu').removeClass('bg-white').addClass('bg-light')
-                $('.page').removeClass('bg-white').addClass('bg-light')
-
-                $('#menu').hide()
-                $('#page').hide()
-                $('#group').show()
-                window.history.pushState(
-                    'page add group menu',
-                    'add group menu', '{{ route('dataMenu') }}?data=add-group-menu');
-            }
-
             function page() {
                 $('.page').removeClass('bg-light').addClass('bg-white')
                 $('.menu').removeClass('bg-white').addClass('bg-light')
@@ -456,155 +467,6 @@
                     'page setting page menu',
                     'setting page menu', '{{ route('dataMenu') }}?data=setting-page-menu');
             }
-
-            // fungsu untuk group menu
-            $('.create-group').on('click', function() {
-                $('input[name="name_group"]').val('')
-                $('input[name="param_group"]').val('')
-            })
-
-            $('.save-group').on('click', function() {
-                $.ajax({
-                    url: "{{ route('dataMenu.savegroup') }}",
-                    type: "post",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        group: $('input[name="name_group"]').val(),
-                        divisi: $('#divisi').find('option').filter(':selected').val(),
-                        param: $('input[name="param_group"]').val()
-                    },
-                    dataType: "json",
-                    success: function(response) {
-                        if (response.error) {
-                            if (response.error.group) {
-                                $('input[name="name_group"]').addClass('is-invalid')
-                                $('#invalid-group').html(response.error.group[0])
-                            } else {
-                                $('input[name="name_group"]').removeClass('is-invalid')
-                                $('#invalid-group').html('')
-                            }
-
-                            if (response.error.divisi) {
-                                $("#divisi + span").addClass("is-invalid");
-                                $('#invalid-divisi').html(response.error.divisi[0])
-                            } else {
-                                $("#divisi + span").removeClass("is-invalid");
-                                $('#invalid-divisi').html('')
-                            }
-                        } else {
-                            Swal.fire({
-                                position: 'top-end',
-                                icon: 'success',
-                                title: 'Your work has been saved',
-                                showConfirmButton: false,
-                                toast: true,
-                                timer: 1500
-                            })
-
-                            $('#menuGroup').modal('hide')
-                            getGroup()
-                            getAllMenu()
-                            sidebarShow()
-                        }
-                    },
-                    error: function(jqXHR, exception) {
-                        Swal.fire(
-                            'The Internet?',
-                            'An error occurred check your internet connection',
-                            'warning'
-                        )
-                    },
-                })
-            })
-
-            $(document).on('click', '.edit-group', function() {
-                $.ajax({
-                    url: "{{ route('dataMenu.delonegroup') }}",
-                    type: "post",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        param: $(this).attr('data-param')
-                    },
-                    dataType: "json",
-                    success: function(response) {
-                        if (response.success) {
-                            $('#menuGroup').modal('show')
-                            $('input[name="name_group"]').val(response.success.name)
-                            $('input[name="param_group"]').val(response.success.id)
-                            $('#divisi').val(response.success.id_divisi).trigger('change')
-                            return false
-                        }
-                        Swal.fire(
-                            'The Internet?',
-                            response.error,
-                            'question'
-                        )
-                        return false
-                    },
-                    error: function(jqXHR, exception) {
-                        Swal.fire(
-                            'The Internet?',
-                            'An error occurred check your internet connection',
-                            'warning'
-                        )
-                    },
-                })
-            })
-
-            $(document).on('click', '.del-group', function() {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: "{{ route('dataMenu.delgroup') }}",
-                            type: "post",
-                            data: {
-                                _token: "{{ csrf_token() }}",
-                                param: $(this).attr('data-param')
-                            },
-                            dataType: "json",
-                            success: function(response) {
-                                if (response.success) {
-                                    Swal.fire({
-                                        position: 'top-end',
-                                        icon: 'success',
-                                        title: response.success,
-                                        showConfirmButton: false,
-                                        toast: true,
-                                        timer: 1500
-                                    })
-
-                                    getGroup()
-                                    getAllMenu()
-                                    sidebarShow()
-                                    return false
-                                }
-
-                                Swal.fire(
-                                    'The Internet?',
-                                    response.error,
-                                    'question'
-                                )
-                                return false
-                            },
-                            error: function(jqXHR, exception) {
-                                Swal.fire(
-                                    'The Internet?',
-                                    'An error occurred check your internet connection',
-                                    'warning'
-                                )
-                            },
-                        })
-                    }
-                })
-            })
 
             // fungsi untuk menu
             $('#menu-group').on('change', function() {
@@ -641,21 +503,13 @@
             })
 
             $('.add-menu').click(function() {
-                $('#menu-group').val('').trigger('change')
-                $('#type-menu').val('').trigger('change')
+                $('#type-menu').val('').trigger('change').prop('disabled', false)
                 $('#name-menu').val('')
                 $('#param-menu').val('')
+                $('#parent-menu').prop('disabled', false)
             })
 
             $('.save-menu').on('click', function() {
-                if ($('select[name=menu-group] option').filter(':selected').val() == '') {
-                    Swal.fire(
-                        'Ups!',
-                        'group menu cannot be empty',
-                        'warning'
-                    )
-                    return false
-                }
 
                 if ($('input[name=name-menu]').val() == '') {
                     Swal.fire(
@@ -691,7 +545,6 @@
                     type: "post",
                     data: {
                         _token: "{{ csrf_token() }}",
-                        id_group: $('select[name=menu-group] option').filter(':selected').val(),
                         name: $('input[name="name-menu"]').val(),
                         type: $('select[name=type-menu] option').filter(':selected').val(),
                         parent: $('select[name=parent-menu] option').filter(':selected').val(),
@@ -713,14 +566,6 @@
                             getSinggleMenu()
                             sidebarShow()
                         } else {
-                            if (response.error.id_group) {
-                                $('#menu-group').addClass('is-invalid')
-                                $('#invalid-menu-group').html(response.error.id_group)
-                            } else {
-                                $('#menu-group').removeClass('is-invalid')
-                                $('#invalid-menu-group').html('')
-                            }
-
                             if (response.error.name) {
                                 $('#name-menu').addClass('is-invalid')
                                 $('#invalid-name-menu').html(response.error.name)
@@ -757,7 +602,7 @@
                 })
             })
 
-            $(document).on('click', '.edit-parent', function() {
+            $(document).on('click', '.edit', function() {
                 $.ajax({
                     url: "{{ route('dataMenu.editMenu') }}",
                     type: "post",
@@ -776,16 +621,27 @@
                                 $('#parent-menu').prop('selectedIndex', 0);
                             }
 
+                            $('#type-menu').prop('disabled', true)
                             $('#param-menu').val(response.success.id)
-                            $('#menu-group').val(response.success.id_divisi).trigger('change')
                             $('#name-menu').val(response.success.name)
                             $('#type-menu').val(response.success.type).trigger('change')
+
+                            if (response.success.parent != '0') {
+                                $('#parent-menu').val(response.success.parent).trigger(
+                                    'change').prop('disabled', true)
+                            }
+                        } else {
+                            Swal.fire(
+                                'Ups?',
+                                response.error,
+                                'warning'
+                            )
                         }
                     }
                 })
             })
 
-            $(document).on('click', '.delete-parent', function() {
+            $(document).on('click', '.delete', function() {
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "You won't be able to revert this!",
@@ -880,6 +736,12 @@
                 $('#page-form').trigger("reset");
                 $('#child_menu').prop('disabled', true)
                 $('#child_menu').html('<option value="">--Select Child Menu--</option>')
+                $('input[name="page"]').each(function(params) {
+                    $(this).prop('checked', false)
+                })
+
+                $('label[click]').removeClass('border-blue')
+                $('#approval').hide()
             })
 
             $('.save-page-menu').on('click', function() {
@@ -938,6 +800,7 @@
 
                             $('#pageMenu').modal('hide')
                             sidebarShow()
+                            getAllMenu()
                             table.ajax.reload();
                         }
                     }
@@ -961,48 +824,109 @@
                 Swal.fire({
                     title: 'Are you sure?',
                     text: text,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, confirm!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('dataMenu.changeStatus') }}",
+                            type: "post",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                param: $(this).attr('data-param')
+                            },
+                            dataType: "json",
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: response.success,
+                                        showConfirmButton: false,
+                                        toast: true,
+                                        timer: 1500
+                                    })
+                                    table.ajax.reload();
+                                    sidebarShow()
+                                    getAllMenu()
+                                } else {
+                                    Swal.fire(
+                                        'Ups?',
+                                        response.error,
+                                        'warning'
+                                    )
+                                }
+                            }
+                        })
+                    }
+                })
+            })
+
+            $(document).on('click', '.delete-page', function() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
                     confirmButtonText: 'Yes, confirm!'
                 }).then((result) => {
-                    if (result.isConfirmed) {}
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('dataMenu.deletePageMenu') }}",
+                            type: "post",
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                param: $(this).attr('data-param')
+                            },
+                            dataType: "json",
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        position: 'top-end',
+                                        icon: 'success',
+                                        title: response.success,
+                                        showConfirmButton: false,
+                                        toast: true,
+                                        timer: 1500
+                                    })
+                                    table.ajax.reload();
+                                    sidebarShow()
+                                    getAllMenu()
+                                } else {
+                                    Swal.fire(
+                                        'Ups?',
+                                        response.error,
+                                        'warning'
+                                    )
+                                }
+                            }
+                        })
+                    }
                 })
             })
 
             $('label[click]').on('click', function() {
                 $('label[click]').removeClass('border-blue')
                 $(this).addClass('border-blue')
-            })
 
-            function getGroup() {
-                let divisi_name
-                $.ajax({
-                    url: "{{ route('dataMenu.getGroupAll') }}",
-                    type: "get",
-                    dataType: "json",
-                    success: function(response) {
-                        if (response.count_group < 1) {
-                            $('#html-group').html(
-                                '<div class="h3 text-center p-4" style="background:#f1f1f1">No data available in grup menu</div>'
-                            )
-                        } else {
-                            $('#html-group').html('')
-                            $('#html-group').html(response.html)
-                            $('#menu-group').html('<option value="">--Select Group--</option>')
-                            $('#menu-group').append(response.option)
-                        }
-                    },
-                    error: function(jqXHR, exception) {
-                        Swal.fire(
-                            'The Internet?',
-                            'An error occurred check your internet connection',
-                            'warning'
-                        )
-                    },
-                })
-            }
+                val = $('input[name="page"]:checked').val()
+                if (val == 'Approver') {
+                    $('#approval').show()
+                } else {
+                    $('#approval').hide()
+                }
+
+                if (val == 'Validator') {
+                    $('#validator').show()
+                } else {
+                    $('#validator').hide()
+                }
+            })
 
             function getAllMenu() {
                 $.ajax({
@@ -1033,8 +957,12 @@
                     type: "get",
                     dataType: "json",
                     success: function(response) {
+                        $('#parent-menu').html('<option value="">--Select Menu--</option>')
                         $('#parent_menu').html('<option value="">--Select Menu--</option>')
                         for (let index = 0; index < response.data.length; index++) {
+                            $('#parent-menu').append('<option value="' + response.data[index].id +
+                                '">' + response
+                                .data[index].name + '</option>')
                             $('#parent_menu').append('<option value="' + response.data[index].id +
                                 '">' + response
                                 .data[index].name + '</option>')

@@ -1,3 +1,4 @@
+    <!-- ============================================================== -->
     <div class="page-breadcrumb">
         <div class="row">
             <div class="col-7 align-self-center">
@@ -6,7 +7,8 @@
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb m-0 p-0">
                             <li class="breadcrumb-item"><a href="javascript:void(0)"
-                                    class="text-muted">{{ $parent->name }}</a></li>
+                                    class="text-muted">{{ $parent->name }}</a>
+                            </li>
                             <li class="breadcrumb-item text-muted active" aria-current="page"><?= $menu->name ?></li>
                         </ol>
                     </nav>
@@ -22,9 +24,9 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">List <?= $menu->name ?></h4>
+                        <h4 class="card-title">List Data <?= $menu->name ?></h4>
                         <div class="table-responsive">
-                            <table class="table border table-striped table-bordered text-nowrap tb-data">
+                            <table class="table border table-striped table-bordered text-nowrap tb-validator">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -45,3 +47,4 @@
         </div>
         <!-- End Top Leader Table -->
     </div>
+    <!--End Container fluid  -->

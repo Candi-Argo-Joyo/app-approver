@@ -17,6 +17,7 @@ class CreateInsertForm extends Migration
             $table->id();
             $table->bigInteger('id_html_form');
             $table->bigInteger('id_user');
+            $table->string('id_user_validator')->nullable();
             $table->string('user_name');
             $table->string('form_name', 255);
             $table->string('uid');
@@ -24,6 +25,8 @@ class CreateInsertForm extends Migration
             $table->string('label');
             $table->text('value');
             $table->string('status')->nullable();
+            $table->bigInteger('on_step')->nullable();
+            $table->string('validate_by')->nullable();
             $table->timestamps();
         });
     }

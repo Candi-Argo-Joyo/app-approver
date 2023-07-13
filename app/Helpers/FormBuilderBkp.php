@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Request;
 
-class FormBuilder
+class FormBuilderBkp
 {
     public static function dataAdd($request)
     {
@@ -35,7 +35,7 @@ class FormBuilder
     {
         $html = '<div class="form-group mb-3" id="validation-' . $length . '">
                             <div class="d-flex flex-row justify-content-between">
-                                <label class="form-label" for="name">Condition Form</label>
+                                <label class="form-label" for="name">Validation ' . $length . '</label>
                                 <div class="justify-items-center">
                                     <a href="javascript:;" class="badge bg-danger delete-validation" data-table="validation-' . $length . '">delete</a>
                                 </div>
@@ -46,7 +46,7 @@ class FormBuilder
                                     <tr style="vertical-align: middle;">
                                         <td rowspan="2">#</td>
                                         <td rowspan="2">Step</td>
-                                        <td rowspan="2">Name</td>
+                                        <td rowspan="2">Required</td>
                                         <td rowspan="2">User Approve</td>
                                         <td colspan="2" class="p-0">
                                             <table style="text-align: center;border-color: #e8eef3;"
@@ -65,9 +65,15 @@ class FormBuilder
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><span id="table_' . $length . '-row">1</span></td>
-                                        <td><input td-count-table_' . $length . ' type="number" name="step_table_' . $length . '[]" class="form-control bg-white" value="1" placeholder="1"></td>
-                                        <td><input td-name-table_' . $length . ' type="text" name="name_table_' . $length . '[]" class="form-control bg-white"></td>
+                                        <td><span id="table-' . $length . '-row">1</span></td>
+                                        <td><input td-count-table-' . $length . ' type="number" name="step_table_' . $length . '[]" class="form-control bg-white" placeholder="1"></td>
+                                        <td>
+                                            <select name="select_required_table_' . $length . '[]" id="" class="form-control bg-white">
+                                                <option value="">--Select Required--</option>
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </select>
+                                        </td>
                                         <td>
                                             <select name="select_table_' . $length . '[]" id="" class="form-control bg-white">
                                                 <option value="">--Select User--</option>
@@ -90,7 +96,7 @@ class FormBuilder
     {
         $html = '<div class="form-group mb-3" id="validation-1">
                             <div class="d-flex flex-row justify-content-between">
-                                <label class="form-label" for="name">Condition Form</label>
+                                <label class="form-label" for="name">Validation 1</label>
                                 <div class="justify-items-center">
                                     <a href="javascript:;" class="badge bg-danger delete-validation" data-table="validation-1">delete</a>
                                 </div>
@@ -101,7 +107,7 @@ class FormBuilder
                                     <tr style="vertical-align: middle;">
                                         <td rowspan="2">#</td>
                                         <td rowspan="2">Step</td>
-                                        <td rowspan="2">Name</td>
+                                        <td rowspan="2">Required</td>
                                         <td rowspan="2">User Approve</td>
                                         <td colspan="2" class="p-0">
                                             <table style="text-align: center;border-color: #e8eef3;"
@@ -122,9 +128,15 @@ class FormBuilder
         $no = 1;
         foreach ($data_validation as $da) {
             $html .= '<tr>
-                                        <td><span id="table_1-row">' . $no . '</span></td>
-                                        <td><input td-count-table_1 type="number" value="' . $da->step . '" name="step_table_1[]" class="form-control bg-white" placeholder="1"></td>
-                                        <td><input td-name-table_1 type="text" name="name_table_1[]" value="' . $da->name . '" class="form-control bg-white"></td>
+                                        <td><span id="table-1-row">' . $no . '</span></td>
+                                        <td><input td-count-table-1 type="number" value="' . $da->step . '" name="step_table_1[]" class="form-control bg-white" placeholder="1"></td>
+                                        <td>
+                                            <select name="select_required_table_1[]" id="" class="form-control bg-white">
+                                                <option value="">--Select Required--</option>
+                                                <option value="true"' . ($da->required == "yes" ? " selected" : "") . '>Yes</option>
+                                                <option value="false"' . ($da->required == "no" ? " selected" : "") . '>No</option>
+                                            </select>
+                                        </td>
                                         <td>
                                             <select name="select_table_1[]" id="" class="form-control bg-white">
                                                 <option value="">--Select User--</option>';
